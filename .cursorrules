@@ -1,0 +1,56 @@
+Bu proje, macOS menü çubuğunda çalışan bir geri sayım uygulamasıdır. Aşağıdaki kuralları ve bilgileri dikkate alarak yardımcı ol:
+
+PROJE YAPISI:
+- TimerApp.swift: Ana uygulama kodu
+- Package.swift: Swift paket yönetimi
+- Info.plist: Uygulama ayarları
+- sound effect/: Ses dosyaları klasörü
+
+TEMEL BİLEŞENLER:
+1. AppDelegate Sınıfı:
+   - statusItem: Menü çubuğu öğesi
+   - timer: Geri sayım zamanlayıcısı
+   - remainingTime: Kalan süre
+   - selectedSound: Seçili ses efekti
+   - customSound: Özel ses dosyası
+
+2. Menü Yapısı:
+   - Süre seçenekleri: 1, 5, 10, 15 dakika
+   - Ses efekti alt menüsü
+   - Durdur ve Çıkış seçenekleri
+
+3. Ses Sistemi:
+   - Özel ses dosyası: "Videoplayback (1).mp3"
+   - Sistem sesleri: Ping, Tink, Purr, vb.
+
+KODLAMA KURALLARI:
+1. Bellek Yönetimi:
+   - Weak self kullan
+   - Timer'ları düzgün temizle
+   - Ses kaynaklarını yönet
+
+2. UI Güncellemeleri:
+   - Ana thread'de yap
+   - Format: "MM:SS" (örn: "05:30")
+
+3. Hata Yönetimi:
+   - Ses dosyası bulunamazsa varsayılan sese dön
+   - Timer hataları için güvenli duruma geç
+
+GELİŞTİRME AŞAMALARI:
+1. MVP (Tamamlandı):
+   - Temel zamanlayıcı
+   - Menü çubuğu entegrasyonu
+   - Ses sistemi
+
+2. Planlanan Özellikler:
+   - Özel süre girişi
+   - Bildirim sistemi
+   - Ayarları kaydetme
+   - Daha fazla ses seçeneği
+
+NOTLAR:
+- macOS 12.0+ gerekli
+- Swift 5.5+ kullanılıyor
+- MIT lisansı altında
+- Ses dosyaları Resources klasöründe tutulmalı 

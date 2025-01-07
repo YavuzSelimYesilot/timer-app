@@ -1,0 +1,11 @@
+.DS_Store
+.build/
+*.app
+TimerApp
+.swiftpm/
+*.xcodeproj/
+DerivedData/
+.idea/
+*.iml
+*.xcworkspace/
+xcuserdata/ 

@@ -12,12 +12,19 @@ enum AlarmSound: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 
     func play() {
-        NSSound(named: rawValue)?.play()
+        guard let sound = NSSound(named: rawValue) else {
+            #if DEBUG
+            print("[AlarmSound] Ses yüklenemedi: '\(rawValue)'")
+            #endif
+            return
+        }
+        sound.play()
     }
 }
 
 // MARK: - Manager
 
+@MainActor
 final class AlarmSoundManager: ObservableObject {
 
     @Published var current: AlarmSound {

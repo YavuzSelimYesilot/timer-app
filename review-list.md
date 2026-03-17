@@ -29,9 +29,10 @@
 - Volume slider, seçim kalıcılığı
 > Düzeltmeler: @MainActor eklendi, try? → do/catch+DEBUG log, AVAudioFormat force unwrap → guard
 
-## 7. Alarm Sesleri (AlarmSoundManager)
+## ✅ 7. Alarm Sesleri (AlarmSoundManager)
 - NSSound sistem sesleri
 - Tıklayınca önizleme
+> Düzeltmeler: @MainActor eklendi, NSSound sessiz başarısızlık → guard + DEBUG log
 
 ## 8. Çoklu Dil Desteği (LanguageManager)
 - TR / EN / DE / JA / ES

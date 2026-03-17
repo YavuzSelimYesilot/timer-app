@@ -155,7 +155,7 @@ struct ModeSelectorView: View {
         HStack(spacing: 0) {
             ForEach(TimerMode.allCases, id: \.self) { mode in
                 Button { engine.switchMode(mode) } label: {
-                    Text(verbatim: lang.loc(mode.shortLocKey))
+                    Text(LocalizedStringKey(mode.shortLocKey), bundle: lang.bundle)
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(engine.mode == mode ? .white : .white.opacity(0.3))
                         .frame(maxWidth: .infinity)
@@ -227,7 +227,7 @@ struct TimerRingView: View {
                             .font(.system(size: 40, weight: .thin, design: .monospaced))
                             .foregroundColor(.white)
                             .transition(.opacity)
-                        Text(verbatim: lang.loc("timer.minutes.label"))
+                        Text("timer.minutes.label", bundle: lang.bundle)
                             .font(.system(size: 8, weight: .semibold))
                             .foregroundColor(.white.opacity(0.4))
                             .tracking(2)
@@ -237,7 +237,8 @@ struct TimerRingView: View {
                             .foregroundColor(.white)
                             .monospacedDigit()
                             .transition(.opacity)
-                        Text(verbatim: lang.loc(engine.mode.locKey).uppercased())
+                        Text(LocalizedStringKey(engine.mode.locKey), bundle: lang.bundle)
+                            .textCase(.uppercase)
                             .font(.system(size: 8, weight: .semibold))
                             .foregroundColor(.white.opacity(engine.hasCustomDuration ? 0.6 : 0.35))
                             .tracking(2)
@@ -370,7 +371,7 @@ struct PresetSelectorView: View {
             Spacer()
 
             if engine.hasCustomDuration {
-                Text(verbatim: lang.loc("preset.custom"))
+                Text("preset.custom", bundle: lang.bundle)
                     .font(.system(size: 9, weight: .medium))
                     .foregroundColor(.white.opacity(0.4))
                     .padding(.horizontal, 7)
@@ -398,7 +399,7 @@ struct ThemeSelectorView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(verbatim: lang.loc("theme.accent.label"))
+            Text("theme.accent.label", bundle: lang.bundle)
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundColor(.white.opacity(0.2))
                 .tracking(1.5)
@@ -431,7 +432,7 @@ struct LanguageSelectorView: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Text(verbatim: lang.loc("settings.language.label"))
+            Text("settings.language.label", bundle: lang.bundle)
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundColor(.white.opacity(0.2))
                 .tracking(1.5)
@@ -465,7 +466,7 @@ struct QuitButtonView: View {
 
     var body: some View {
         Button { NSApplication.shared.terminate(nil) } label: {
-            Text(verbatim: lang.loc("app.quit"))
+            Text("app.quit", bundle: lang.bundle)
                 .font(.system(size: 11))
                 .foregroundColor(.white.opacity(0.25))
         }

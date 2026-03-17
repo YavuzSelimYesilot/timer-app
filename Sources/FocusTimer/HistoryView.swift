@@ -119,10 +119,10 @@ struct HistoryView: View {
 
     private var emptyState: some View {
         VStack(spacing: 6) {
-            Text(verbatim: lang.loc("history.empty.title"))
+            Text("history.empty.title", bundle: lang.bundle)
                 .font(.system(size: 13, weight: .light))
                 .foregroundColor(.white.opacity(0.3))
-            Text(verbatim: lang.loc("history.empty.subtitle"))
+            Text("history.empty.subtitle", bundle: lang.bundle)
                 .font(.system(size: 10))
                 .foregroundColor(.white.opacity(0.18))
                 .multilineTextAlignment(.center)
@@ -219,7 +219,7 @@ struct SessionRowView: View {
                 .frame(width: 6, height: 6)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(verbatim: lang.loc(session.mode.locKey))
+                Text(LocalizedStringKey(session.mode.locKey), bundle: lang.bundle)
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white.opacity(0.75))
                 Text(verbatim: formattedDate)

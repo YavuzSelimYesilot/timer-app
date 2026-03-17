@@ -48,3 +48,6 @@
 "ambient.white" = "ホワイトノイズ";
 "ambient.rain"  = "雨音";
 "ambient.lofi"  = "ローファイ";
+
+/* Alarm sound */
+"alarm.label" = "通知音";

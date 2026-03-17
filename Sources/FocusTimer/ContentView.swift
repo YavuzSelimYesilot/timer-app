@@ -11,6 +11,7 @@ struct ContentView: View {
     @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var theme: ThemeManager
     @EnvironmentObject var lang: LanguageManager
+    @EnvironmentObject var alarm: AlarmSoundManager
     @Environment(\.modelContext) private var modelContext
     @State private var showHistory = false
     @State private var showFloating = false
@@ -94,6 +95,10 @@ struct ContentView: View {
             .padding(.top, 10)
             .padding(.horizontal, 20)
 
+        AlarmSelectorView()
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+
         LanguageSelectorView()
             .padding(.top, 10)
             .padding(.horizontal, 20)
@@ -120,7 +125,7 @@ struct ContentView: View {
     }
 
     private func playCompletionSound() {
-        NSSound(named: "Glass")?.play()
+        alarm.play()
     }
 
     private func sendNotification(for mode: TimerMode, completedSessions: Int) {
@@ -488,6 +493,46 @@ struct AmbientSelectorView: View {
             }
         }
         .animation(.easeInOut(duration: 0.18), value: ambient.current?.rawValue)
+    }
+}
+
+// MARK: - Alarm Sound Selector
+
+struct AlarmSelectorView: View {
+    @EnvironmentObject var alarm: AlarmSoundManager
+    @EnvironmentObject var lang: LanguageManager
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("alarm.label", bundle: lang.bundle)
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(.white.opacity(0.2))
+                .tracking(1.5)
+            Spacer()
+            HStack(spacing: 4) {
+                ForEach(AlarmSound.allCases) { sound in
+                    Button {
+                        alarm.current = sound
+                        sound.play()          // önizleme
+                    } label: {
+                        Text(verbatim: sound.rawValue)
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundColor(
+                                alarm.current == sound ? .white : .white.opacity(0.28)
+                            )
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(
+                                alarm.current == sound
+                                    ? Color.white.opacity(0.12)
+                                    : Color.clear
+                            )
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 }
 

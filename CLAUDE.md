@@ -303,7 +303,7 @@ Mevcut kontrol listesine ek olarak her commit öncesinde:
 
 ### Phase 3 — Ses & Çoklu Dil
 - [x] Çalışma sırasında ambient müzik (lofi/brown noise, rain/pink noise, white noise — AVAudioEngine ile programatik üretim)
-- [ ] Özel alarm sesleri
+- [x] Özel alarm sesleri (Glass/Ping/Tink/Hero/Funk — NSSound sistem sesleri, tıklayınca önizleme)
 - [x] TR / EN / DE / JA / ES dil desteği (LanguageManager, runtime switching, Localizable.strings)
 - [ ] iCloud sync (cihazlar arası geçmiş)
 

@@ -11,6 +11,7 @@ struct FocusTimerApp: App {
     @StateObject private var theme   = ThemeManager()
     @StateObject private var lang    = LanguageManager()
     @StateObject private var ambient = AmbientAudioEngine()
+    @StateObject private var alarm   = AlarmSoundManager()
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -20,6 +21,7 @@ struct FocusTimerApp: App {
                 .environmentObject(theme)
                 .environmentObject(lang)
                 .environmentObject(ambient)
+                .environmentObject(alarm)
         } label: {
             MenuBarLabel(engine: engine, theme: theme)
         }

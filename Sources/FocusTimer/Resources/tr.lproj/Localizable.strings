@@ -48,3 +48,6 @@
 "ambient.white" = "Beyaz Gürültü";
 "ambient.rain"  = "Yağmur";
 "ambient.lofi"  = "Lofi";
+
+/* Alarm sound */
+"alarm.label" = "ALARM";

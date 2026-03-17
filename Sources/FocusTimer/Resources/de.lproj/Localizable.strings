@@ -48,3 +48,6 @@
 "ambient.white" = "Weißes Rauschen";
 "ambient.rain"  = "Regen";
 "ambient.lofi"  = "Lofi";
+
+/* Alarm sound */
+"alarm.label" = "ALARM";

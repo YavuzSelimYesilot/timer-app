@@ -16,6 +16,7 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var showHistory = false
     @State private var showFloating = false
+    @State private var showDevAssistant = false
     @State private var cancellables = Set<AnyCancellable>()
 
     var body: some View {
@@ -38,10 +39,21 @@ struct ContentView: View {
 
                 Button {
                     showHistory.toggle()
+                    if showHistory { showDevAssistant = false }
                 } label: {
                     Image(systemName: "chart.bar.fill")
                         .font(.system(size: 12))
                         .foregroundColor(showHistory ? .white : .white.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    showDevAssistant.toggle()
+                    if showDevAssistant { showHistory = false }
+                } label: {
+                    Image(systemName: showDevAssistant ? "wrench.and.screwdriver.fill" : "wrench.and.screwdriver")
+                        .font(.system(size: 12))
+                        .foregroundColor(showDevAssistant ? .white : .white.opacity(0.3))
                 }
                 .buttonStyle(.plain)
             }
@@ -49,7 +61,13 @@ struct ContentView: View {
             .padding(.top, 18)
             .padding(.bottom, 12)
 
-            if showHistory {
+            if showDevAssistant {
+                DevAssistantView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .trailing).combined(with: .opacity)
+                    ))
+            } else if showHistory {
                 HistoryView()
                     .transition(.asymmetric(
                         insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -66,6 +84,7 @@ struct ContentView: View {
         .frame(width: 280)
         .background(Color(red: 0.07, green: 0.07, blue: 0.07))
         .animation(.easeInOut(duration: 0.22), value: showHistory)
+        .animation(.easeInOut(duration: 0.22), value: showDevAssistant)
         .onAppear {
             observeCompletion()
             streak.validateStreak()

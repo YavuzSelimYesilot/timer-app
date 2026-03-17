@@ -1,30 +1,6 @@
 import Foundation
 import Combine
-
-// MARK: - Anonymous Session Payload
-// Kural: kullanıcı adı, cihaz adı, IP veya tam timestamp içermez.
-
-struct AISessionPayload: Codable {
-    let durationMinutes: Int
-    let mode: String          // "Focus" / "Short Break" / "Long Break"
-    let completedSessions: Int
-    let hourOfDay: Int        // 0-23, tarih yok
-    let dayOfWeek: Int        // 1-7, yıl/ay yok
-    let streakDays: Int
-}
-
-// MARK: - AI Response Model
-
-struct AIRadioResponse: Codable, Equatable {
-    let ambient: String   // "white" | "rain" | "lofi"
-    let volume: Float     // 0.4–0.8
-    let mood: String
-    let reason: String
-
-    var ambientSound: AmbientSound? {
-        AmbientSound(rawValue: ambient)
-    }
-}
+import TimerCore
 
 // MARK: - Service
 

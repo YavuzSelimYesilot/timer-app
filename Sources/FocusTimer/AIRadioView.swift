@@ -1,6 +1,10 @@
 import SwiftUI
 import TimerCore
 
+extension AIRadioResponse {
+    var ambientSound: AmbientSound? { AmbientSound(rawValue: ambient) }
+}
+
 // MARK: - AI Radio Row
 
 struct AIRadioView: View {

@@ -12,6 +12,7 @@ struct ContentView: View {
     @EnvironmentObject var theme: ThemeManager
     @EnvironmentObject var lang: LanguageManager
     @EnvironmentObject var alarm: AlarmSoundManager
+    @EnvironmentObject var streak: StreakManager
     @Environment(\.modelContext) private var modelContext
     @State private var showHistory = false
     @State private var showFloating = false
@@ -65,7 +66,10 @@ struct ContentView: View {
         .frame(width: 280)
         .background(Color(red: 0.07, green: 0.07, blue: 0.07))
         .animation(.easeInOut(duration: 0.22), value: showHistory)
-        .onAppear { observeCompletion() }
+        .onAppear {
+            observeCompletion()
+            streak.validateStreak()
+        }
     }
 
     @ViewBuilder
@@ -79,6 +83,10 @@ struct ContentView: View {
 
         SessionDotsView()
             .padding(.top, 16)
+
+        StreakRowView()
+            .padding(.top, 12)
+            .padding(.horizontal, 20)
 
         ControlButtonsView()
             .padding(.top, 22)
@@ -151,6 +159,9 @@ struct ContentView: View {
     private func saveSession(mode: TimerMode, minutes: Int) {
         let session = FocusSession(date: Date(), mode: mode, durationMinutes: minutes)
         modelContext.insert(session)
+        if mode == .focus {
+            streak.recordSession()
+        }
     }
 }
 
@@ -291,6 +302,39 @@ struct SessionDotsView: View {
                     .fill(i < engine.sessionsInCycle ? theme.accentColor : Color.white.opacity(0.15))
                     .frame(width: 6, height: 6)
                     .animation(.easeInOut(duration: 0.3), value: engine.sessionsInCycle)
+            }
+        }
+    }
+}
+
+// MARK: - Streak Row
+
+struct StreakRowView: View {
+    @EnvironmentObject var streak: StreakManager
+    @EnvironmentObject var theme: ThemeManager
+
+    var body: some View {
+        HStack {
+            HStack(spacing: 4) {
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 9))
+                    .foregroundColor(streak.currentStreak > 0 ? theme.accentColor : .white.opacity(0.15))
+                Text("\(streak.currentStreak)")
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .foregroundColor(streak.currentStreak > 0 ? .white.opacity(0.7) : .white.opacity(0.2))
+            }
+            .scaleEffect(streak.streakMilestone != nil ? 1.15 : 1.0)
+            .animation(.spring(response: 0.3, dampingFraction: 0.5), value: streak.currentStreak)
+
+            Spacer()
+
+            HStack(spacing: 4) {
+                Image(systemName: "trophy.fill")
+                    .font(.system(size: 9))
+                    .foregroundColor(.white.opacity(0.15))
+                Text("\(streak.longestStreak)")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundColor(.white.opacity(0.2))
             }
         }
     }

@@ -19,6 +19,6 @@ public extension Int {
     func roundedToNearest(_ step: Int) -> Int {
         guard step > 0 else { return self }
         let r = self % step
-        return r < step / 2 ? self - r : self - r + step
+        return r * 2 < step ? self - r : self - r + step
     }
 }

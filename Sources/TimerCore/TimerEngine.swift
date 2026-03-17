@@ -6,11 +6,11 @@ public final class TimerEngine: ObservableObject {
 
     // MARK: - Published State
 
-    @Published public var mode: TimerMode = .focus
-    @Published public var timeRemaining: Int = TimerPreset.classic.focus * 60
-    @Published public var isRunning: Bool = false
-    @Published public var completedSessions: Int = 0
-    @Published public var preset: TimerPreset = .classic
+    @Published public internal(set) var mode: TimerMode = .focus
+    @Published public internal(set) var timeRemaining: Int = TimerPreset.classic.focus * 60
+    @Published public internal(set) var isRunning: Bool = false
+    @Published public internal(set) var completedSessions: Int = 0
+    @Published public internal(set) var preset: TimerPreset = .classic
 
     // MARK: - Completion Publisher
 

@@ -15,8 +15,8 @@ struct ContentView: View {
     @EnvironmentObject var streak: StreakManager
     @Environment(\.modelContext) private var modelContext
     @State private var showHistory = false
-    @State private var showFloating = false
     @State private var showDevAssistant = false
+    @ObservedObject private var floatingController = FloatingTimerController.shared
     @State private var cancellables = Set<AnyCancellable>()
 
     var body: some View {
@@ -28,12 +28,11 @@ struct ContentView: View {
                     .foregroundColor(.white.opacity(0.25))
                 Spacer()
                 Button {
-                    FloatingTimerController.shared.toggle(engine: engine, theme: theme, lang: lang)
-                    showFloating = FloatingTimerController.shared.isVisible
+                    floatingController.toggle(engine: engine, theme: theme, lang: lang)
                 } label: {
-                    Image(systemName: showFloating ? "pip.fill" : "pip")
+                    Image(systemName: floatingController.isVisible ? "pip.fill" : "pip")
                         .font(.system(size: 12))
-                        .foregroundColor(showFloating ? .white : .white.opacity(0.3))
+                        .foregroundColor(floatingController.isVisible ? .white : .white.opacity(0.3))
                 }
                 .buttonStyle(.plain)
 

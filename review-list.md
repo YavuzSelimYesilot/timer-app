@@ -19,9 +19,10 @@
 - Accent renk seçimi, UserDefaults kalıcılığı
 > Not: `ThemeManager` `@MainActor` değil — implicit main thread, explicit yapılabilir
 
-## 5. Menu Bar Progress Ring & Floating Window
+## ✅ 5. Menu Bar Progress Ring & Floating Window
 - `MenuBarLabel` — animasyonlu progress ring
 - `FloatingTimerWindow` — NSPanel tabanlı overlay
+> Düzeltme: × butonu ile kapanınca pip ikonu senkronize olmuyordu — NSWindowDelegate + @Published isVisible ile giderildi
 
 ## 6. Ambient Ses (AmbientAudioEngine)
 - White / rain / lofi — programatik AVAudioEngine üretimi

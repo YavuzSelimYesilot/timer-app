@@ -5,15 +5,16 @@ import TimerCore
 // MARK: - Controller
 
 @MainActor
-final class FloatingTimerController {
+final class FloatingTimerController: NSObject, ObservableObject, NSWindowDelegate {
     static let shared = FloatingTimerController()
     private var panel: NSPanel?
 
-    var isVisible: Bool { panel?.isVisible ?? false }
+    @Published private(set) var isVisible = false
 
     func toggle(engine: TimerEngine, theme: ThemeManager, lang: LanguageManager) {
         if let panel, panel.isVisible {
             panel.orderOut(nil)
+            isVisible = false
         } else {
             show(engine: engine, theme: theme, lang: lang)
         }
@@ -22,6 +23,7 @@ final class FloatingTimerController {
     private func show(engine: TimerEngine, theme: ThemeManager, lang: LanguageManager) {
         if panel == nil { createPanel(engine: engine, theme: theme, lang: lang) }
         panel?.orderFront(nil)
+        isVisible = true
     }
 
     private func createPanel(engine: TimerEngine, theme: ThemeManager, lang: LanguageManager) {
@@ -36,6 +38,7 @@ final class FloatingTimerController {
         p.isMovableByWindowBackground = true
         p.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
         p.hidesOnDeactivate = false
+        p.delegate = self
 
         p.contentView = NSHostingView(
             rootView: FloatingTimerView()
@@ -52,6 +55,11 @@ final class FloatingTimerController {
         }
 
         panel = p
+    }
+
+    // NSWindowDelegate — × butonu ile kapatılınca senkronize et
+    nonisolated func windowWillClose(_ notification: Notification) {
+        Task { @MainActor in self.isVisible = false }
     }
 }
 

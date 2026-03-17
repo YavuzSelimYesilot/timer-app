@@ -15,8 +15,9 @@
 - Günlük/haftalık listeleme
 > Düzeltmeler: sessiz mode fallback'e DEBUG log eklendi, DateFormatter static yapıldı
 
-## 4. Tema Sistemi (ThemeManager)
+## ✅ 4. Tema Sistemi (ThemeManager)
 - Accent renk seçimi, UserDefaults kalıcılığı
+> Not: `ThemeManager` `@MainActor` değil — implicit main thread, explicit yapılabilir
 
 ## 5. Menu Bar Progress Ring & Floating Window
 - `MenuBarLabel` — animasyonlu progress ring

@@ -110,6 +110,11 @@ struct ContentView: View {
         ControlButtonsView()
             .padding(.top, 22)
 
+        BreakSuggestionView()
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+            .animation(.easeInOut(duration: 0.25), value: engine.completedSessions)
+
         PresetSelectorView()
             .padding(.top, 16)
             .padding(.horizontal, 20)

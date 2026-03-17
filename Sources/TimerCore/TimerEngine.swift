@@ -12,13 +12,15 @@ public final class TimerEngine: ObservableObject {
     @Published public var completedSessions: Int = 0
     @Published public var preset: TimerPreset = .classic
 
-    // MARK: - Completion Publisher (macOS layer observes this for sound/notification)
+    // MARK: - Completion Publisher
 
-    public let completionPublisher = PassthroughSubject<TimerMode, Never>()
+    public let completionPublisher = PassthroughSubject<(mode: TimerMode, minutes: Int), Never>()
 
     // MARK: - Private
 
     private var cancellable: AnyCancellable?
+    /// Per-mode overrides set by the circular slider (nil = use preset)
+    private var customDurations: [TimerMode: Int] = [:]
 
     public init() {}
 
@@ -34,24 +36,31 @@ public final class TimerEngine: ObservableObject {
         String(format: "%02d:%02d", timeRemaining / 60, timeRemaining % 60)
     }
 
-    /// How many sessions completed in the current 4-session cycle (0–3)
-    public var sessionsInCycle: Int {
-        completedSessions % 4
+    public var sessionsInCycle: Int { completedSessions % 4 }
+
+    /// Current duration in minutes for the active mode (custom override or preset)
+    public var currentDurationMinutes: Int {
+        customDurations[mode] ?? presetMinutes
     }
 
-    private var totalSeconds: Int {
+    /// True if the current mode has a custom (slider-set) duration
+    public var hasCustomDuration: Bool {
+        customDurations[mode] != nil
+    }
+
+    private var totalSeconds: Int { currentDurationMinutes * 60 }
+
+    private var presetMinutes: Int {
         switch mode {
-        case .focus:      return preset.focus * 60
-        case .shortBreak: return preset.shortBreak * 60
-        case .longBreak:  return preset.longBreak * 60
+        case .focus:      return preset.focus
+        case .shortBreak: return preset.shortBreak
+        case .longBreak:  return preset.longBreak
         }
     }
 
     // MARK: - Actions
 
-    public func toggle() {
-        isRunning ? pause() : start()
-    }
+    public func toggle() { isRunning ? pause() : start() }
 
     public func start() {
         guard !isRunning else { return }
@@ -81,7 +90,16 @@ public final class TimerEngine: ObservableObject {
     public func applyPreset(_ newPreset: TimerPreset) {
         pause()
         preset = newPreset
+        customDurations.removeAll()
         timeRemaining = totalSeconds
+    }
+
+    /// Called by the circular slider — sets a custom duration for the current mode
+    public func setDuration(minutes: Int) {
+        guard !isRunning else { return }
+        let clamped = max(1, min(90, minutes))
+        customDurations[mode] = clamped
+        timeRemaining = clamped * 60
     }
 
     // MARK: - Private
@@ -96,13 +114,10 @@ public final class TimerEngine: ObservableObject {
 
     private func complete() {
         let completedMode = mode
+        let minutes = currentDurationMinutes
         pause()
-
-        if completedMode == .focus {
-            completedSessions += 1
-        }
-
-        completionPublisher.send(completedMode)
+        if completedMode == .focus { completedSessions += 1 }
+        completionPublisher.send((mode: completedMode, minutes: minutes))
         advance(from: completedMode)
     }
 

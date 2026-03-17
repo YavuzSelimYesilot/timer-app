@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 import AppKit
 import Combine
 import UserNotifications
@@ -8,46 +9,87 @@ import TimerCore
 
 struct ContentView: View {
     @EnvironmentObject var engine: TimerEngine
+    @Environment(\.modelContext) private var modelContext
+    @State private var showHistory = false
     @State private var cancellables = Set<AnyCancellable>()
 
     var body: some View {
         VStack(spacing: 0) {
-            ModeSelectorView()
-                .padding(.top, 20)
-                .padding(.horizontal, 20)
+            // Header
+            HStack {
+                Text("FocusTimer")
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.25))
+                Spacer()
+                Button {
+                    showHistory.toggle()
+                } label: {
+                    Image(systemName: "chart.bar.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(showHistory ? .white : .white.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 18)
+            .padding(.bottom, 12)
 
-            TimerRingView()
-                .frame(width: 164, height: 164)
-                .padding(.top, 28)
-
-            SessionDotsView()
-                .padding(.top, 18)
-
-            ControlButtonsView()
-                .padding(.top, 24)
-
-            PresetSelectorView()
-                .padding(.top, 18)
-                .padding(.bottom, 22)
-                .padding(.horizontal, 20)
-
-            Divider()
-                .background(Color.white.opacity(0.06))
-
-            QuitButtonView()
-                .padding(.vertical, 10)
+            if showHistory {
+                HistoryView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .trailing).combined(with: .opacity)
+                    ))
+            } else {
+                timerBody
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .leading).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+            }
         }
         .frame(width: 280)
         .background(Color(red: 0.07, green: 0.07, blue: 0.07))
+        .animation(.easeInOut(duration: 0.22), value: showHistory)
         .onAppear { observeCompletion() }
     }
+
+    @ViewBuilder
+    private var timerBody: some View {
+        ModeSelectorView()
+            .padding(.horizontal, 20)
+
+        TimerRingView()
+            .frame(width: 164, height: 164)
+            .padding(.top, 24)
+
+        SessionDotsView()
+            .padding(.top, 16)
+
+        ControlButtonsView()
+            .padding(.top, 22)
+
+        PresetSelectorView()
+            .padding(.top, 16)
+            .padding(.horizontal, 20)
+
+        Divider()
+            .background(Color.white.opacity(0.06))
+            .padding(.top, 18)
+
+        QuitButtonView()
+            .padding(.vertical, 10)
+    }
+
+    // MARK: - Completion handling
 
     private func observeCompletion() {
         engine.completionPublisher
             .receive(on: DispatchQueue.main)
-            .sink { completedMode in
+            .sink { event in
                 playCompletionSound()
-                sendNotification(for: completedMode, nextSessions: engine.completedSessions)
+                sendNotification(for: event.mode, completedSessions: engine.completedSessions)
+                saveSession(mode: event.mode, minutes: event.minutes)
             }
             .store(in: &cancellables)
     }
@@ -56,12 +98,12 @@ struct ContentView: View {
         NSSound(named: "Glass")?.play()
     }
 
-    private func sendNotification(for mode: TimerMode, nextSessions: Int) {
+    private func sendNotification(for mode: TimerMode, completedSessions: Int) {
         let content = UNMutableNotificationContent()
         switch mode {
         case .focus:
             content.title = "Session complete"
-            content.body  = nextSessions % 4 == 0 ? "Take a long break, you earned it." : "Short break time."
+            content.body  = completedSessions % 4 == 0 ? "Take a long break, you earned it." : "Short break time."
         case .shortBreak:
             content.title = "Break over"
             content.body  = "Back to work."
@@ -72,6 +114,11 @@ struct ContentView: View {
         content.sound = .default
         let req = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
         UNUserNotificationCenter.current().add(req)
+    }
+
+    private func saveSession(mode: TimerMode, minutes: Int) {
+        let session = FocusSession(date: Date(), mode: mode, durationMinutes: minutes)
+        modelContext.insert(session)
     }
 }
 
@@ -101,40 +148,117 @@ struct ModeSelectorView: View {
     }
 }
 
-// MARK: - Timer Ring
+// MARK: - Timer Ring (with circular slider)
 
 struct TimerRingView: View {
     @EnvironmentObject var engine: TimerEngine
+    @State private var isDragging = false
+    @State private var dragMinutes: Int = 0
+
+    /// Max minutes the slider allows per mode
+    private var maxMinutes: Int {
+        switch engine.mode {
+        case .focus:      return 90
+        case .shortBreak: return 30
+        case .longBreak:  return 45
+        }
+    }
 
     var body: some View {
-        ZStack {
-            // Track
-            Circle()
-                .stroke(Color.white.opacity(0.08), lineWidth: 5)
+        GeometryReader { geo in
+            let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
 
-            // Progress
-            Circle()
-                .trim(from: 0, to: engine.progress)
-                .stroke(
-                    Color.white,
-                    style: StrokeStyle(lineWidth: 5, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .animation(.linear(duration: 1), value: engine.progress)
+            ZStack {
+                // Outer drag handle ring (invisible, large hit area)
+                Circle()
+                    .stroke(Color.white.opacity(isDragging ? 0.06 : 0.0), lineWidth: 18)
+                    .animation(.easeInOut(duration: 0.15), value: isDragging)
 
-            // Time + label
-            VStack(spacing: 5) {
-                Text(engine.timeString)
-                    .font(.system(size: 40, weight: .thin, design: .monospaced))
-                    .foregroundColor(.white)
-                    .monospacedDigit()
+                // Track ring
+                Circle()
+                    .stroke(Color.white.opacity(0.08), lineWidth: 5)
 
-                Text(engine.mode.rawValue.uppercased())
-                    .font(.system(size: 8, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.35))
-                    .tracking(2)
+                // Progress / slider arc
+                Circle()
+                    .trim(from: 0, to: engine.progress)
+                    .stroke(
+                        Color.white,
+                        style: StrokeStyle(lineWidth: 5, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .animation(isDragging ? .none : .linear(duration: 1), value: engine.progress)
+
+                // Drag thumb — visible only when not running
+                if !engine.isRunning {
+                    let angle = engine.progress * 2 * .pi - .pi / 2
+                    let r = (geo.size.width / 2) - 2.5
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: isDragging ? 11 : 8, height: isDragging ? 11 : 8)
+                        .shadow(color: .white.opacity(0.4), radius: isDragging ? 4 : 0)
+                        .offset(
+                            x: r * cos(angle),
+                            y: r * sin(angle)
+                        )
+                        .animation(.easeInOut(duration: 0.15), value: isDragging)
+                }
+
+                // Center content
+                VStack(spacing: 5) {
+                    if isDragging {
+                        Text("\(dragMinutes)")
+                            .font(.system(size: 40, weight: .thin, design: .monospaced))
+                            .foregroundColor(.white)
+                            .transition(.opacity)
+                        Text("MIN")
+                            .font(.system(size: 8, weight: .semibold))
+                            .foregroundColor(.white.opacity(0.4))
+                            .tracking(2)
+                    } else {
+                        Text(engine.timeString)
+                            .font(.system(size: 40, weight: .thin, design: .monospaced))
+                            .foregroundColor(.white)
+                            .monospacedDigit()
+                            .transition(.opacity)
+                        Text(engine.mode.rawValue.uppercased())
+                            .font(.system(size: 8, weight: .semibold))
+                            .foregroundColor(.white.opacity(engine.hasCustomDuration ? 0.6 : 0.35))
+                            .tracking(2)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.12), value: isDragging)
             }
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        guard !engine.isRunning else { return }
+                        let minutes = minutesFrom(location: value.location, center: center)
+                        dragMinutes = minutes
+                        engine.setDuration(minutes: minutes)
+                        if !isDragging { isDragging = true }
+                    }
+                    .onEnded { _ in isDragging = false }
+            )
         }
+    }
+
+    // MARK: - Circular math
+
+    private func minutesFrom(location: CGPoint, center: CGPoint) -> Int {
+        let dx = location.x - center.x
+        let dy = location.y - center.y
+        // atan2 from top, clockwise
+        var angle = atan2(dx, -dy)
+        if angle < 0 { angle += 2 * .pi }
+        let fraction = angle / (2 * .pi)
+        return max(1, min(maxMinutes, Int(fraction * Double(maxMinutes)).roundedToNearest(5)))
+    }
+}
+
+private extension Int {
+    func roundedToNearest(_ step: Int) -> Int {
+        let r = self % step
+        return r < step / 2 ? self - r : self - r + step
     }
 }
 
@@ -162,36 +286,18 @@ struct ControlButtonsView: View {
 
     var body: some View {
         HStack(spacing: 14) {
-            // Reset
-            CircleButton(
-                icon: "arrow.counterclockwise",
-                size: 44,
-                iconSize: 14,
-                foreground: .white.opacity(0.55),
-                background: .white.opacity(0.07)
-            ) {
+            CircleButton(icon: "arrow.counterclockwise", size: 44, iconSize: 14,
+                         foreground: .white.opacity(0.55), background: .white.opacity(0.07)) {
                 engine.reset()
             }
 
-            // Play / Pause
-            CircleButton(
-                icon: engine.isRunning ? "pause.fill" : "play.fill",
-                size: 58,
-                iconSize: 20,
-                foreground: .black,
-                background: .white
-            ) {
+            CircleButton(icon: engine.isRunning ? "pause.fill" : "play.fill",
+                         size: 58, iconSize: 20, foreground: .black, background: .white) {
                 engine.toggle()
             }
 
-            // Skip
-            CircleButton(
-                icon: "forward.end.fill",
-                size: 44,
-                iconSize: 14,
-                foreground: .white.opacity(0.55),
-                background: .white.opacity(0.07)
-            ) {
+            CircleButton(icon: "forward.end.fill", size: 44, iconSize: 14,
+                         foreground: .white.opacity(0.55), background: .white.opacity(0.07)) {
                 skipToNext()
             }
         }
@@ -239,13 +345,13 @@ struct PresetSelectorView: View {
                 Button { engine.applyPreset(preset) } label: {
                     Text(preset.name)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(engine.preset == preset ? .white : .white.opacity(0.35))
+                        .foregroundColor(isActive(preset) ? .white : .white.opacity(0.35))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .background(engine.preset == preset ? Color.white.opacity(0.12) : Color.clear)
+                        .background(isActive(preset) ? Color.white.opacity(0.12) : Color.clear)
                         .overlay(
                             Capsule()
-                                .stroke(Color.white.opacity(engine.preset == preset ? 0 : 0.1), lineWidth: 1)
+                                .stroke(Color.white.opacity(isActive(preset) ? 0 : 0.1), lineWidth: 1)
                         )
                         .clipShape(Capsule())
                 }
@@ -254,11 +360,25 @@ struct PresetSelectorView: View {
 
             Spacer()
 
-            // Total time indicator
-            Text("\(engine.preset.focus)m")
-                .font(.system(size: 10, weight: .regular))
-                .foregroundColor(.white.opacity(0.2))
+            // Shows custom indicator when slider has overridden preset
+            if engine.hasCustomDuration {
+                Text("custom")
+                    .font(.system(size: 9, weight: .medium))
+                    .foregroundColor(.white.opacity(0.4))
+                    .padding(.horizontal, 7)
+                    .padding(.vertical, 4)
+                    .background(Color.white.opacity(0.08))
+                    .clipShape(Capsule())
+            } else {
+                Text("\(engine.currentDurationMinutes)m")
+                    .font(.system(size: 10, weight: .regular))
+                    .foregroundColor(.white.opacity(0.2))
+            }
         }
+    }
+
+    private func isActive(_ preset: TimerPreset) -> Bool {
+        engine.preset == preset && !engine.hasCustomDuration
     }
 }
 
@@ -266,9 +386,7 @@ struct PresetSelectorView: View {
 
 struct QuitButtonView: View {
     var body: some View {
-        Button {
-            NSApplication.shared.terminate(nil)
-        } label: {
+        Button { NSApplication.shared.terminate(nil) } label: {
             Text("Quit FocusTimer")
                 .font(.system(size: 11))
                 .foregroundColor(.white.opacity(0.25))

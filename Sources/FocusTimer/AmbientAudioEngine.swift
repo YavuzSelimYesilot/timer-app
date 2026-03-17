@@ -31,6 +31,7 @@ enum AmbientSound: String, Identifiable {
 
 // MARK: - Engine
 
+@MainActor
 final class AmbientAudioEngine: ObservableObject {
 
     @Published private(set) var current: AmbientSound? {
@@ -79,8 +80,13 @@ final class AmbientAudioEngine: ObservableObject {
             return
         }
         startEngineIfNeeded()
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2) else {
+            #if DEBUG
+            print("[AmbientAudioEngine] AVAudioFormat oluşturulamadı")
+            #endif
+            return
+        }
         let newNode = makeNode(for: sound)
-        let format  = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!
         engine.attach(newNode)
         engine.connect(newNode, to: mixer, format: format)
         node = newNode
@@ -94,7 +100,13 @@ final class AmbientAudioEngine: ObservableObject {
 
     private func startEngineIfNeeded() {
         guard !engine.isRunning else { return }
-        try? engine.start()
+        do {
+            try engine.start()
+        } catch {
+            #if DEBUG
+            print("[AmbientAudioEngine] Engine başlatılamadı: \(error)")
+            #endif
+        }
     }
 
     // MARK: - Node Factories

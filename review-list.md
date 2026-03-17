@@ -24,9 +24,10 @@
 - `FloatingTimerWindow` — NSPanel tabanlı overlay
 > Düzeltme: × butonu ile kapanınca pip ikonu senkronize olmuyordu — NSWindowDelegate + @Published isVisible ile giderildi
 
-## 6. Ambient Ses (AmbientAudioEngine)
+## ✅ 6. Ambient Ses (AmbientAudioEngine)
 - White / rain / lofi — programatik AVAudioEngine üretimi
 - Volume slider, seçim kalıcılığı
+> Düzeltmeler: @MainActor eklendi, try? → do/catch+DEBUG log, AVAudioFormat force unwrap → guard
 
 ## 7. Alarm Sesleri (AlarmSoundManager)
 - NSSound sistem sesleri

@@ -1,0 +1,44 @@
+/* Timer modes */
+"mode.focus"            = "Odak";
+"mode.shortBreak"       = "Kısa Mola";
+"mode.longBreak"        = "Uzun Mola";
+"mode.focus.short"      = "Odak";
+"mode.shortBreak.short" = "Kısa";
+"mode.longBreak.short"  = "Uzun";
+
+/* Timer ring center */
+"timer.minutes.label" = "DAK";
+
+/* Preset / duration */
+"preset.custom" = "özel";
+
+/* Theme selector */
+"theme.accent.label" = "RENK";
+
+/* Language selector */
+"settings.language.label" = "DİL";
+
+/* App */
+"app.quit" = "FocusTimer'ı Kapat";
+
+/* Notifications */
+"notification.focus.title"          = "Oturum tamamlandı";
+"notification.focus.body.longBreak" = "Uzun bir mola hak ettin.";
+"notification.focus.body.shortBreak"= "Kısa mola zamanı.";
+"notification.shortBreak.title"     = "Mola bitti";
+"notification.shortBreak.body"      = "Çalışmaya dön.";
+"notification.longBreak.title"      = "Uzun mola bitti";
+"notification.longBreak.body"       = "Odaklanmaya hazır mısın?";
+
+/* History stats */
+"history.today"    = "BUGÜN";
+"history.thisWeek" = "BU HAFTA";
+"history.allTime"  = "TOPLAM";
+
+/* History empty state */
+"history.empty.title"    = "Henüz oturum yok";
+"history.empty.subtitle" = "Geçmişini görmek için bir oturumu tamamla.";
+
+/* History date formatting */
+"history.date.today"     = "Bugün, %@";
+"history.date.yesterday" = "Dün, %@";

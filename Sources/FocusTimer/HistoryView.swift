@@ -24,6 +24,7 @@ final class FocusSession {
 // MARK: - History View
 
 struct HistoryView: View {
+    @EnvironmentObject var lang: LanguageManager
     @Query(sort: \FocusSession.date, order: .reverse) private var sessions: [FocusSession]
 
     private var focusSessions: [FocusSession] {
@@ -40,13 +41,8 @@ struct HistoryView: View {
         return focusSessions.filter { $0.date >= start }
     }
 
-    private var todayMinutes: Int {
-        todaySessions.reduce(0) { $0 + $1.durationMinutes }
-    }
-
-    private var weekMinutes: Int {
-        weekSessions.reduce(0) { $0 + $1.durationMinutes }
-    }
+    private var todayMinutes: Int { todaySessions.reduce(0) { $0 + $1.durationMinutes } }
+    private var weekMinutes: Int  { weekSessions.reduce(0) { $0 + $1.durationMinutes } }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -54,7 +50,7 @@ struct HistoryView: View {
             HStack(spacing: 0) {
                 StatCard(
                     value: "\(todaySessions.count)",
-                    label: "TODAY",
+                    label: lang.loc("history.today"),
                     sub: "\(todayMinutes)m"
                 )
                 Divider()
@@ -62,7 +58,7 @@ struct HistoryView: View {
                     .frame(height: 44)
                 StatCard(
                     value: "\(weekSessions.count)",
-                    label: "THIS WEEK",
+                    label: lang.loc("history.thisWeek"),
                     sub: "\(weekMinutes)m"
                 )
                 Divider()
@@ -70,7 +66,7 @@ struct HistoryView: View {
                     .frame(height: 44)
                 StatCard(
                     value: "\(focusSessions.count)",
-                    label: "ALL TIME",
+                    label: lang.loc("history.allTime"),
                     sub: totalHoursLabel
                 )
             }
@@ -123,10 +119,10 @@ struct HistoryView: View {
 
     private var emptyState: some View {
         VStack(spacing: 6) {
-            Text("No sessions yet")
+            Text(verbatim: lang.loc("history.empty.title"))
                 .font(.system(size: 13, weight: .light))
                 .foregroundColor(.white.opacity(0.3))
-            Text("Complete a session to see your history.")
+            Text(verbatim: lang.loc("history.empty.subtitle"))
                 .font(.system(size: 10))
                 .foregroundColor(.white.opacity(0.18))
                 .multilineTextAlignment(.center)
@@ -145,14 +141,14 @@ struct StatCard: View {
 
     var body: some View {
         VStack(spacing: 3) {
-            Text(value)
+            Text(verbatim: value)
                 .font(.system(size: 22, weight: .thin, design: .monospaced))
                 .foregroundColor(.white)
-            Text(label)
+            Text(verbatim: label)
                 .font(.system(size: 7, weight: .semibold))
                 .foregroundColor(.white.opacity(0.3))
                 .tracking(1.5)
-            Text(sub)
+            Text(verbatim: sub)
                 .font(.system(size: 9))
                 .foregroundColor(.white.opacity(0.2))
         }
@@ -190,7 +186,7 @@ struct WeeklyBarChart: View {
                         .fill(isToday(day) ? Color.white : Color.white.opacity(0.2))
                         .frame(height: max(3, CGFloat(mins) / CGFloat(maxVal) * 40))
 
-                    Text(dayLabel(day))
+                    Text(verbatim: dayLabel(day))
                         .font(.system(size: 8))
                         .foregroundColor(isToday(day) ? .white.opacity(0.5) : .white.opacity(0.2))
                 }
@@ -213,6 +209,7 @@ struct WeeklyBarChart: View {
 // MARK: - Session Row
 
 struct SessionRowView: View {
+    @EnvironmentObject var lang: LanguageManager
     let session: FocusSession
 
     var body: some View {
@@ -222,10 +219,10 @@ struct SessionRowView: View {
                 .frame(width: 6, height: 6)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.mode.rawValue)
+                Text(verbatim: lang.loc(session.mode.locKey))
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(.white.opacity(0.75))
-                Text(formattedDate)
+                Text(verbatim: formattedDate)
                     .font(.system(size: 9))
                     .foregroundColor(.white.opacity(0.25))
             }
@@ -250,12 +247,13 @@ struct SessionRowView: View {
 
     private var formattedDate: String {
         let f = DateFormatter()
+        f.locale = Locale(identifier: lang.currentLanguage.code)
         if Calendar.current.isDateInToday(session.date) {
             f.dateFormat = "HH:mm"
-            return "Today, \(f.string(from: session.date))"
+            return String(format: lang.loc("history.date.today"), f.string(from: session.date))
         } else if Calendar.current.isDateInYesterday(session.date) {
             f.dateFormat = "HH:mm"
-            return "Yesterday, \(f.string(from: session.date))"
+            return String(format: lang.loc("history.date.yesterday"), f.string(from: session.date))
         } else {
             f.dateFormat = "MMM d, HH:mm"
             return f.string(from: session.date)

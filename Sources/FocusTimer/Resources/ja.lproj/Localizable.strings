@@ -1,0 +1,44 @@
+/* Timer modes */
+"mode.focus"            = "集中";
+"mode.shortBreak"       = "短い休憩";
+"mode.longBreak"        = "長い休憩";
+"mode.focus.short"      = "集中";
+"mode.shortBreak.short" = "短休";
+"mode.longBreak.short"  = "長休";
+
+/* Timer ring center */
+"timer.minutes.label" = "分";
+
+/* Preset / duration */
+"preset.custom" = "カスタム";
+
+/* Theme selector */
+"theme.accent.label" = "色";
+
+/* Language selector */
+"settings.language.label" = "言語";
+
+/* App */
+"app.quit" = "FocusTimerを終了";
+
+/* Notifications */
+"notification.focus.title"          = "セッション完了";
+"notification.focus.body.longBreak" = "頑張りました！長い休憩を取りましょう。";
+"notification.focus.body.shortBreak"= "短い休憩の時間です。";
+"notification.shortBreak.title"     = "休憩終了";
+"notification.shortBreak.body"      = "作業に戻りましょう。";
+"notification.longBreak.title"      = "長い休憩終了";
+"notification.longBreak.body"       = "集中する準備はできましたか？";
+
+/* History stats */
+"history.today"    = "今日";
+"history.thisWeek" = "今週";
+"history.allTime"  = "合計";
+
+/* History empty state */
+"history.empty.title"    = "セッションなし";
+"history.empty.subtitle" = "セッションを完了すると履歴が表示されます。";
+
+/* History date formatting */
+"history.date.today"     = "今日 %@";
+"history.date.yesterday" = "昨日 %@";

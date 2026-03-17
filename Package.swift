@@ -3,6 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "FocusTimer",
+    defaultLocalization: "en",
     platforms: [.macOS(.v14)],
     products: [
         .executable(name: "FocusTimer", targets: ["FocusTimer"])
@@ -15,7 +16,8 @@ let package = Package(
         .executableTarget(
             name: "FocusTimer",
             dependencies: ["TimerCore"],
-            path: "Sources/FocusTimer"
+            path: "Sources/FocusTimer",
+            resources: [.process("Resources")]
         ),
         .testTarget(
             name: "TimerCoreTests",

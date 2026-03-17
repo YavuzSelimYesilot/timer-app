@@ -1,0 +1,44 @@
+/* Timer modes */
+"mode.focus"            = "Fokus";
+"mode.shortBreak"       = "Kurze Pause";
+"mode.longBreak"        = "Lange Pause";
+"mode.focus.short"      = "Fokus";
+"mode.shortBreak.short" = "Kurz";
+"mode.longBreak.short"  = "Lang";
+
+/* Timer ring center */
+"timer.minutes.label" = "MIN";
+
+/* Preset / duration */
+"preset.custom" = "eigen";
+
+/* Theme selector */
+"theme.accent.label" = "FARBE";
+
+/* Language selector */
+"settings.language.label" = "SPRACHE";
+
+/* App */
+"app.quit" = "FocusTimer beenden";
+
+/* Notifications */
+"notification.focus.title"          = "Sitzung abgeschlossen";
+"notification.focus.body.longBreak" = "Mach eine lange Pause, du hast es verdient.";
+"notification.focus.body.shortBreak"= "Zeit für eine kurze Pause.";
+"notification.shortBreak.title"     = "Pause vorbei";
+"notification.shortBreak.body"      = "Zurück zur Arbeit.";
+"notification.longBreak.title"      = "Lange Pause vorbei";
+"notification.longBreak.body"       = "Bereit zum Fokussieren?";
+
+/* History stats */
+"history.today"    = "HEUTE";
+"history.thisWeek" = "DIESE WOCHE";
+"history.allTime"  = "GESAMT";
+
+/* History empty state */
+"history.empty.title"    = "Noch keine Sitzungen";
+"history.empty.subtitle" = "Schließe eine Sitzung ab, um deinen Verlauf zu sehen.";
+
+/* History date formatting */
+"history.date.today"     = "Heute, %@";
+"history.date.yesterday" = "Gestern, %@";

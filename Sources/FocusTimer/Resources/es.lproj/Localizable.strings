@@ -1,0 +1,44 @@
+/* Timer modes */
+"mode.focus"            = "Enfoque";
+"mode.shortBreak"       = "Descanso corto";
+"mode.longBreak"        = "Descanso largo";
+"mode.focus.short"      = "Foco";
+"mode.shortBreak.short" = "Corto";
+"mode.longBreak.short"  = "Largo";
+
+/* Timer ring center */
+"timer.minutes.label" = "MIN";
+
+/* Preset / duration */
+"preset.custom" = "custom";
+
+/* Theme selector */
+"theme.accent.label" = "COLOR";
+
+/* Language selector */
+"settings.language.label" = "IDIOMA";
+
+/* App */
+"app.quit" = "Salir de FocusTimer";
+
+/* Notifications */
+"notification.focus.title"          = "Sesión completada";
+"notification.focus.body.longBreak" = "Tómate un descanso largo, te lo mereces.";
+"notification.focus.body.shortBreak"= "Hora del descanso corto.";
+"notification.shortBreak.title"     = "Descanso terminado";
+"notification.shortBreak.body"      = "De vuelta al trabajo.";
+"notification.longBreak.title"      = "Descanso largo terminado";
+"notification.longBreak.body"       = "¿Listo para enfocarte?";
+
+/* History stats */
+"history.today"    = "HOY";
+"history.thisWeek" = "ESTA SEMANA";
+"history.allTime"  = "TOTAL";
+
+/* History empty state */
+"history.empty.title"    = "Sin sesiones aún";
+"history.empty.subtitle" = "Completa una sesión para ver tu historial.";
+
+/* History date formatting */
+"history.date.today"     = "Hoy, %@";
+"history.date.yesterday" = "Ayer, %@";

@@ -9,6 +9,7 @@ struct FocusTimerApp: App {
 
     @StateObject private var engine = TimerEngine()
     @StateObject private var theme  = ThemeManager()
+    @StateObject private var lang   = LanguageManager()
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -16,6 +17,7 @@ struct FocusTimerApp: App {
             ContentView()
                 .environmentObject(engine)
                 .environmentObject(theme)
+                .environmentObject(lang)
         } label: {
             MenuBarLabel(engine: engine, theme: theme)
         }

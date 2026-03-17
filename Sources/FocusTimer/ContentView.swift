@@ -10,6 +10,7 @@ import TimerCore
 struct ContentView: View {
     @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var theme: ThemeManager
+    @EnvironmentObject var lang: LanguageManager
     @Environment(\.modelContext) private var modelContext
     @State private var showHistory = false
     @State private var showFloating = false
@@ -23,9 +24,8 @@ struct ContentView: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.white.opacity(0.25))
                 Spacer()
-                // Floating window toggle
                 Button {
-                    FloatingTimerController.shared.toggle(engine: engine, theme: theme)
+                    FloatingTimerController.shared.toggle(engine: engine, theme: theme, lang: lang)
                     showFloating = FloatingTimerController.shared.isVisible
                 } label: {
                     Image(systemName: showFloating ? "pip.fill" : "pip")
@@ -90,6 +90,10 @@ struct ContentView: View {
             .padding(.top, 10)
             .padding(.horizontal, 20)
 
+        LanguageSelectorView()
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+
         Divider()
             .background(Color.white.opacity(0.06))
             .padding(.top, 12)
@@ -119,14 +123,16 @@ struct ContentView: View {
         let content = UNMutableNotificationContent()
         switch mode {
         case .focus:
-            content.title = "Session complete"
-            content.body  = completedSessions % 4 == 0 ? "Take a long break, you earned it." : "Short break time."
+            content.title = lang.loc("notification.focus.title")
+            content.body  = completedSessions % 4 == 0
+                ? lang.loc("notification.focus.body.longBreak")
+                : lang.loc("notification.focus.body.shortBreak")
         case .shortBreak:
-            content.title = "Break over"
-            content.body  = "Back to work."
+            content.title = lang.loc("notification.shortBreak.title")
+            content.body  = lang.loc("notification.shortBreak.body")
         case .longBreak:
-            content.title = "Long break over"
-            content.body  = "Ready to focus?"
+            content.title = lang.loc("notification.longBreak.title")
+            content.body  = lang.loc("notification.longBreak.body")
         }
         content.sound = .default
         let req = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
@@ -143,12 +149,13 @@ struct ContentView: View {
 
 struct ModeSelectorView: View {
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var lang: LanguageManager
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(TimerMode.allCases, id: \.self) { mode in
                 Button { engine.switchMode(mode) } label: {
-                    Text(mode.shortTitle)
+                    Text(verbatim: lang.loc(mode.shortLocKey))
                         .font(.system(size: 11, weight: .medium))
                         .foregroundColor(engine.mode == mode ? .white : .white.opacity(0.3))
                         .frame(maxWidth: .infinity)
@@ -170,10 +177,10 @@ struct ModeSelectorView: View {
 struct TimerRingView: View {
     @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var theme: ThemeManager
+    @EnvironmentObject var lang: LanguageManager
     @State private var isDragging = false
     @State private var dragMinutes: Int = 0
 
-    /// Max minutes the slider allows per mode
     private var maxMinutes: Int {
         switch engine.mode {
         case .focus:      return 90
@@ -187,16 +194,13 @@ struct TimerRingView: View {
             let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
 
             ZStack {
-                // Outer drag handle ring (invisible, large hit area)
                 Circle()
                     .stroke(Color.white.opacity(isDragging ? 0.06 : 0.0), lineWidth: 18)
                     .animation(.easeInOut(duration: 0.15), value: isDragging)
 
-                // Track ring
                 Circle()
                     .stroke(Color.white.opacity(0.08), lineWidth: 5)
 
-                // Progress / slider arc
                 Circle()
                     .trim(from: 0, to: engine.progress)
                     .stroke(
@@ -206,7 +210,6 @@ struct TimerRingView: View {
                     .rotationEffect(.degrees(-90))
                     .animation(isDragging ? .none : .linear(duration: 1), value: engine.progress)
 
-                // Drag thumb — visible only when not running
                 if !engine.isRunning {
                     let angle = engine.progress * 2 * .pi - .pi / 2
                     let r = (geo.size.width / 2) - 2.5
@@ -214,21 +217,17 @@ struct TimerRingView: View {
                         .fill(theme.accentColor)
                         .frame(width: isDragging ? 11 : 8, height: isDragging ? 11 : 8)
                         .shadow(color: .white.opacity(0.4), radius: isDragging ? 4 : 0)
-                        .offset(
-                            x: r * cos(angle),
-                            y: r * sin(angle)
-                        )
+                        .offset(x: r * cos(angle), y: r * sin(angle))
                         .animation(.easeInOut(duration: 0.15), value: isDragging)
                 }
 
-                // Center content
                 VStack(spacing: 5) {
                     if isDragging {
                         Text("\(dragMinutes)")
                             .font(.system(size: 40, weight: .thin, design: .monospaced))
                             .foregroundColor(.white)
                             .transition(.opacity)
-                        Text("MIN")
+                        Text(verbatim: lang.loc("timer.minutes.label"))
                             .font(.system(size: 8, weight: .semibold))
                             .foregroundColor(.white.opacity(0.4))
                             .tracking(2)
@@ -238,7 +237,7 @@ struct TimerRingView: View {
                             .foregroundColor(.white)
                             .monospacedDigit()
                             .transition(.opacity)
-                        Text(engine.mode.rawValue.uppercased())
+                        Text(verbatim: lang.loc(engine.mode.locKey).uppercased())
                             .font(.system(size: 8, weight: .semibold))
                             .foregroundColor(.white.opacity(engine.hasCustomDuration ? 0.6 : 0.35))
                             .tracking(2)
@@ -259,8 +258,6 @@ struct TimerRingView: View {
             )
         }
     }
-
-    // MARK: - Circular math
 
     private func minutesFrom(location: CGPoint, center: CGPoint) -> Int {
         minutesFromAngle(
@@ -349,12 +346,13 @@ struct CircleButton: View {
 
 struct PresetSelectorView: View {
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var lang: LanguageManager
 
     var body: some View {
         HStack(spacing: 6) {
             ForEach(TimerPreset.all, id: \.name) { preset in
                 Button { engine.applyPreset(preset) } label: {
-                    Text(preset.name)
+                    Text(verbatim: preset.name)
                         .font(.system(size: 10, weight: .medium))
                         .foregroundColor(isActive(preset) ? .white : .white.opacity(0.35))
                         .padding(.horizontal, 10)
@@ -371,9 +369,8 @@ struct PresetSelectorView: View {
 
             Spacer()
 
-            // Shows custom indicator when slider has overridden preset
             if engine.hasCustomDuration {
-                Text("custom")
+                Text(verbatim: lang.loc("preset.custom"))
                     .font(.system(size: 9, weight: .medium))
                     .foregroundColor(.white.opacity(0.4))
                     .padding(.horizontal, 7)
@@ -397,10 +394,11 @@ struct PresetSelectorView: View {
 
 struct ThemeSelectorView: View {
     @EnvironmentObject var theme: ThemeManager
+    @EnvironmentObject var lang: LanguageManager
 
     var body: some View {
         HStack(spacing: 8) {
-            Text("ACCENT")
+            Text(verbatim: lang.loc("theme.accent.label"))
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundColor(.white.opacity(0.2))
                 .tracking(1.5)
@@ -426,12 +424,48 @@ struct ThemeSelectorView: View {
     }
 }
 
+// MARK: - Language Selector
+
+struct LanguageSelectorView: View {
+    @EnvironmentObject var lang: LanguageManager
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(verbatim: lang.loc("settings.language.label"))
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(.white.opacity(0.2))
+                .tracking(1.5)
+            Spacer()
+            HStack(spacing: 4) {
+                ForEach(LanguageManager.supported) { language in
+                    Button {
+                        lang.setLanguage(language)
+                    } label: {
+                        Text(verbatim: language.label)
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundColor(lang.currentLanguage == language ? .white : .white.opacity(0.28))
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 3)
+                            .background(lang.currentLanguage == language
+                                ? Color.white.opacity(0.12)
+                                : Color.clear)
+                            .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+}
+
 // MARK: - Quit Button
 
 struct QuitButtonView: View {
+    @EnvironmentObject var lang: LanguageManager
+
     var body: some View {
         Button { NSApplication.shared.terminate(nil) } label: {
-            Text("Quit FocusTimer")
+            Text(verbatim: lang.loc("app.quit"))
                 .font(.system(size: 11))
                 .foregroundColor(.white.opacity(0.25))
         }

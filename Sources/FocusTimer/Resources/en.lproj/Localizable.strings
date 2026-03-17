@@ -1,0 +1,44 @@
+/* Timer modes */
+"mode.focus"            = "Focus";
+"mode.shortBreak"       = "Short Break";
+"mode.longBreak"        = "Long Break";
+"mode.focus.short"      = "Focus";
+"mode.shortBreak.short" = "Short";
+"mode.longBreak.short"  = "Long";
+
+/* Timer ring center */
+"timer.minutes.label" = "MIN";
+
+/* Preset / duration */
+"preset.custom" = "custom";
+
+/* Theme selector */
+"theme.accent.label" = "ACCENT";
+
+/* Language selector */
+"settings.language.label" = "LANG";
+
+/* App */
+"app.quit" = "Quit FocusTimer";
+
+/* Notifications */
+"notification.focus.title"          = "Session complete";
+"notification.focus.body.longBreak" = "Take a long break, you earned it.";
+"notification.focus.body.shortBreak"= "Short break time.";
+"notification.shortBreak.title"     = "Break over";
+"notification.shortBreak.body"      = "Back to work.";
+"notification.longBreak.title"      = "Long break over";
+"notification.longBreak.body"       = "Ready to focus?";
+
+/* History stats */
+"history.today"    = "TODAY";
+"history.thisWeek" = "THIS WEEK";
+"history.allTime"  = "ALL TIME";
+
+/* History empty state */
+"history.empty.title"    = "No sessions yet";
+"history.empty.subtitle" = "Complete a session to see your history.";
+
+/* History date formatting */
+"history.date.today"     = "Today, %@";
+"history.date.yesterday" = "Yesterday, %@";

@@ -11,20 +11,20 @@ final class FloatingTimerController {
 
     var isVisible: Bool { panel?.isVisible ?? false }
 
-    func toggle(engine: TimerEngine, theme: ThemeManager) {
+    func toggle(engine: TimerEngine, theme: ThemeManager, lang: LanguageManager) {
         if let panel, panel.isVisible {
             panel.orderOut(nil)
         } else {
-            show(engine: engine, theme: theme)
+            show(engine: engine, theme: theme, lang: lang)
         }
     }
 
-    private func show(engine: TimerEngine, theme: ThemeManager) {
-        if panel == nil { createPanel(engine: engine, theme: theme) }
+    private func show(engine: TimerEngine, theme: ThemeManager, lang: LanguageManager) {
+        if panel == nil { createPanel(engine: engine, theme: theme, lang: lang) }
         panel?.orderFront(nil)
     }
 
-    private func createPanel(engine: TimerEngine, theme: ThemeManager) {
+    private func createPanel(engine: TimerEngine, theme: ThemeManager, lang: LanguageManager) {
         let p = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 200, height: 72),
             styleMask: [.nonactivatingPanel, .hudWindow, .titled, .closable],
@@ -41,6 +41,7 @@ final class FloatingTimerController {
             rootView: FloatingTimerView()
                 .environmentObject(engine)
                 .environmentObject(theme)
+                .environmentObject(lang)
         )
 
         if let screen = NSScreen.main {
@@ -59,6 +60,7 @@ final class FloatingTimerController {
 struct FloatingTimerView: View {
     @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var theme: ThemeManager
+    @EnvironmentObject var lang: LanguageManager
 
     var body: some View {
         HStack(spacing: 12) {
@@ -83,7 +85,7 @@ struct FloatingTimerView: View {
                     .font(.system(size: 22, weight: .thin, design: .monospaced))
                     .foregroundColor(.white)
                     .monospacedDigit()
-                Text(engine.mode.rawValue.uppercased())
+                Text(verbatim: lang.loc(engine.mode.locKey).uppercased())
                     .font(.system(size: 8, weight: .semibold))
                     .foregroundColor(.white.opacity(0.4))
                     .tracking(1.5)

@@ -90,6 +90,10 @@ struct ContentView: View {
             .padding(.top, 10)
             .padding(.horizontal, 20)
 
+        AmbientSelectorView()
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+
         LanguageSelectorView()
             .padding(.top, 10)
             .padding(.horizontal, 20)
@@ -422,6 +426,68 @@ struct ThemeSelectorView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Ambient Sound Selector
+
+struct AmbientSelectorView: View {
+    @EnvironmentObject var ambient: AmbientAudioEngine
+    @EnvironmentObject var theme: ThemeManager
+    @EnvironmentObject var lang: LanguageManager
+
+    var body: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Text("ambient.label", bundle: lang.bundle)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundColor(.white.opacity(0.2))
+                    .tracking(1.5)
+                Spacer()
+                HStack(spacing: 4) {
+                    ForEach(AmbientSound.all) { sound in
+                        Button { ambient.select(sound) } label: {
+                            Image(systemName: sound.icon)
+                                .font(.system(size: 10))
+                                .foregroundColor(
+                                    ambient.current == sound
+                                        ? theme.accentColor
+                                        : .white.opacity(0.28)
+                                )
+                                .frame(width: 24, height: 24)
+                                .background(
+                                    ambient.current == sound
+                                        ? Color.white.opacity(0.1)
+                                        : Color.clear
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
+            if ambient.current != nil {
+                HStack(spacing: 6) {
+                    Image(systemName: "speaker.fill")
+                        .font(.system(size: 8))
+                        .foregroundColor(.white.opacity(0.2))
+                    Slider(
+                        value: Binding(
+                            get: { Double(ambient.volume) },
+                            set: { ambient.volume = Float($0) }
+                        ),
+                        in: 0...1
+                    )
+                    .tint(theme.accentColor)
+                    Image(systemName: "speaker.wave.3.fill")
+                        .font(.system(size: 8))
+                        .foregroundColor(.white.opacity(0.2))
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .animation(.easeInOut(duration: 0.18), value: ambient.current?.rawValue)
     }
 }
 

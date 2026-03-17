@@ -7,9 +7,10 @@ import TimerCore
 @main
 struct FocusTimerApp: App {
 
-    @StateObject private var engine = TimerEngine()
-    @StateObject private var theme  = ThemeManager()
-    @StateObject private var lang   = LanguageManager()
+    @StateObject private var engine  = TimerEngine()
+    @StateObject private var theme   = ThemeManager()
+    @StateObject private var lang    = LanguageManager()
+    @StateObject private var ambient = AmbientAudioEngine()
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
@@ -18,6 +19,7 @@ struct FocusTimerApp: App {
                 .environmentObject(engine)
                 .environmentObject(theme)
                 .environmentObject(lang)
+                .environmentObject(ambient)
         } label: {
             MenuBarLabel(engine: engine, theme: theme)
         }

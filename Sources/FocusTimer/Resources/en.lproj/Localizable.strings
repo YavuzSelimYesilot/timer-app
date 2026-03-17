@@ -42,3 +42,9 @@
 /* History date formatting */
 "history.date.today"     = "Today, %@";
 "history.date.yesterday" = "Yesterday, %@";
+
+/* Ambient sound */
+"ambient.label" = "SOUND";
+"ambient.white" = "White Noise";
+"ambient.rain"  = "Rain";
+"ambient.lofi"  = "Lofi";

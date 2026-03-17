@@ -42,3 +42,9 @@
 /* History date formatting */
 "history.date.today"     = "今日 %@";
 "history.date.yesterday" = "昨日 %@";
+
+/* Ambient sound */
+"ambient.label" = "音";
+"ambient.white" = "ホワイトノイズ";
+"ambient.rain"  = "雨音";
+"ambient.lofi"  = "ローファイ";

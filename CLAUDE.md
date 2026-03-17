@@ -302,9 +302,9 @@ Mevcut kontrol listesine ek olarak her commit öncesinde:
 - [x] Floating window (NSPanel tabanlı floating timer overlay, pip butonu)
 
 ### Phase 3 — Ses & Çoklu Dil
-- [ ] Çalışma sırasında ambient müzik (lofi, rain, white noise seçenekleri)
+- [x] Çalışma sırasında ambient müzik (lofi/brown noise, rain/pink noise, white noise — AVAudioEngine ile programatik üretim)
 - [ ] Özel alarm sesleri
-- [ ] TR / EN / DE / JA / ES dil desteği
+- [x] TR / EN / DE / JA / ES dil desteği (LanguageManager, runtime switching, Localizable.strings)
 - [ ] iCloud sync (cihazlar arası geçmiş)
 
 ### Phase 4 — AI & Radio

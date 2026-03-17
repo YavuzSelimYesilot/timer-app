@@ -42,3 +42,9 @@
 /* History date formatting */
 "history.date.today"     = "Bugün, %@";
 "history.date.yesterday" = "Dün, %@";
+
+/* Ambient sound */
+"ambient.label" = "SES";
+"ambient.white" = "Beyaz Gürültü";
+"ambient.rain"  = "Yağmur";
+"ambient.lofi"  = "Lofi";

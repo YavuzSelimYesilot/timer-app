@@ -104,7 +104,7 @@ public final class TimerEngine: ObservableObject {
 
     // MARK: - Private
 
-    private func tick() {
+    internal func tick() {
         if timeRemaining > 0 {
             timeRemaining -= 1
         } else {
@@ -112,7 +112,7 @@ public final class TimerEngine: ObservableObject {
         }
     }
 
-    private func complete() {
+    internal func complete() {
         let completedMode = mode
         let minutes = currentDurationMinutes
         pause()
@@ -121,7 +121,7 @@ public final class TimerEngine: ObservableObject {
         advance(from: completedMode)
     }
 
-    private func advance(from completedMode: TimerMode) {
+    internal func advance(from completedMode: TimerMode) {
         switch completedMode {
         case .focus:
             switchMode(completedSessions % 4 == 0 ? .longBreak : .shortBreak)

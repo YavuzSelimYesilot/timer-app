@@ -245,20 +245,11 @@ struct TimerRingView: View {
     // MARK: - Circular math
 
     private func minutesFrom(location: CGPoint, center: CGPoint) -> Int {
-        let dx = location.x - center.x
-        let dy = location.y - center.y
-        // atan2 from top, clockwise
-        var angle = atan2(dx, -dy)
-        if angle < 0 { angle += 2 * .pi }
-        let fraction = angle / (2 * .pi)
-        return max(1, min(maxMinutes, Int(fraction * Double(maxMinutes)).roundedToNearest(5)))
-    }
-}
-
-private extension Int {
-    func roundedToNearest(_ step: Int) -> Int {
-        let r = self % step
-        return r < step / 2 ? self - r : self - r + step
+        minutesFromAngle(
+            dx: location.x - center.x,
+            dy: location.y - center.y,
+            maxMinutes: maxMinutes
+        )
     }
 }
 

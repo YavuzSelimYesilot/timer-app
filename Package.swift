@@ -16,6 +16,11 @@ let package = Package(
             name: "FocusTimer",
             dependencies: ["TimerCore"],
             path: "Sources/FocusTimer"
+        ),
+        .testTarget(
+            name: "TimerCoreTests",
+            dependencies: ["TimerCore"],
+            path: "Tests/TimerCoreTests"
         )
     ]
 )

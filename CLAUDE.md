@@ -188,6 +188,101 @@ final class OrnekTests: XCTestCase {
 
 ---
 
+## Güvenlik Kuralları
+
+> **Bu bölüm zorunludur.** Kullanıcı oturum verileri toplanacak ve AI analizine gönderilecek.
+> Her yeni özellikte aşağıdaki kurallar harfiyen uygulanır. Kural ihlali olan kod commit edilmez.
+
+### 1. Sır Yönetimi — API Anahtarları ve Token'lar
+
+- **API anahtarları asla kaynak kodda bulunmaz.** `let apiKey = "sk-..."` gibi satırlar kesinlikle yasaktır.
+- **UserDefaults, plist veya SwiftData'ya sır yazılmaz.** Bu alanlar şifrelenmemiştir.
+- Tüm sırlar **Keychain** üzerinden saklanır. Bunun için bir `KeychainService` wrapper yazılır:
+
+```swift
+// Doğru: Keychain
+KeychainService.save(key: "claude_api_key", value: apiKey)
+
+// Yanlış: UserDefaults
+UserDefaults.standard.set(apiKey, forKey: "claude_api_key") // YASAK
+```
+
+- OAuth token'ları (Notion, Obsidian entegrasyonu) da Keychain'e gider.
+- Build ortamı için `.xcconfig` veya environment variable kullanılabilir; bu dosyalar `.gitignore`'a eklenir.
+
+### 2. Ağ Güvenliği
+
+- **HTTPS zorunludur.** `Info.plist`'te `NSAllowsArbitraryLoads = true` ayarı yapılmaz.
+- Tüm API çağrıları `URLSession` ile yapılır; custom `URLSessionDelegate` yazılıyorsa sertifika doğrulaması atlanmaz.
+- AI API'sine istek gönderilirken **timeout** tanımlanır (önerilen: 30 saniye).
+- API yanıtları güvenilmez kabul edilir; gelen JSON her zaman `Codable` ile decode edilir, `try!` kullanılmaz.
+
+### 3. Veri Minimizasyonu — AI'ya Ne Gönderilir
+
+- Claude API'sine gönderilecek veri **sadece anonim oturum metrikleri** içerir:
+  - `duration_minutes`, `mode`, `timestamp` (tarih, saat yok — sadece gün/saat dilimi)
+  - Kullanıcı adı, cihaz adı, IP adresi **hiçbir zaman gönderilmez**.
+- Payload gönderilmeden önce `DataAnonymizer` katmanından geçirilir.
+- AI yanıtı içinde kişisel veri olup olmadığı log'a yazılmadan önce kontrol edilir.
+
+```swift
+// Doğru: anonim payload
+struct SessionPayload: Codable {
+    let durationMinutes: Int
+    let mode: String          // "focus" / "break"
+    let hourOfDay: Int        // 0-23, tarih yok
+    let dayOfWeek: Int        // 1-7, yıl/ay yok
+}
+
+// Yanlış: tanımlayıcı veri ekleme
+struct SessionPayload: Codable {
+    let userId: String        // YASAK
+    let deviceName: String    // YASAK
+    let exactTimestamp: Date  // YASAK
+}
+```
+
+### 4. Yerel Veri Güvenliği (SwiftData)
+
+- `FocusSession` şu an hassas veri içermez; Phase 4'te **AI analiz sonuçları** eklenirse bu alanlar `@Attribute(.encrypt)` ile işaretlenir.
+- SwiftData store'u uygulama sandbox'ı dışına açılmaz (`modelContainer` default lokasyonu korunur).
+- iCloud sync (Phase 3) etkinleştirilirken `NSPersistentCloudKitContainer` yerine **CloudKit private database** kullanılır; public database'e oturum verisi yazılmaz.
+
+### 5. Kullanıcı İzni ve Şeffaflık
+
+- AI özelliği ilk açıldığında kullanıcıya **ne toplandığı ve nereye gönderildiği** açıkça gösterilir; onay alınmadan veri gönderilmez.
+- Bildirim, iCloud sync ve AI analiz özelliklerinin her biri **ayrı ayrı toggle** ile devre dışı bırakılabilir.
+- Ayarlar ekranında "Tüm verileri sil" seçeneği bulunur; bu işlev SwiftData store'u ve Keychain'deki tüm token'ları temizler.
+
+### 6. Loglama Kuralları
+
+- `print()` veya `Logger` ile **API anahtarı, token, tam timestamp veya kullanıcı verisi** loglanmaz.
+- Debug logları `#if DEBUG` bloğuna alınır; release build'de hiçbir hassas veri konsola düşmez.
+- Hata mesajları kullanıcıya gösterilirken API'nin iç hata detayları (stack trace, endpoint URL'si) gizlenir.
+
+### 7. Commit Öncesi Güvenlik Kontrol Listesi
+
+Mevcut kontrol listesine ek olarak her commit öncesinde:
+
+- [ ] Kaynak kodda `sk-`, `Bearer `, `apiKey =`, `secret =` gibi desenler yok mu? (`grep -r "sk-" Sources/`)
+- [ ] Yeni network çağrısı varsa HTTPS mi? Timeout tanımlı mı?
+- [ ] AI'ya gönderilen payload `DataAnonymizer`'dan geçiyor mu?
+- [ ] Yeni `UserDefaults` anahtarı eklendiyse sır içeriyor mu? (içeriyorsa Keychain'e taşı)
+- [ ] Yeni izin (entitlement) eklendiyse gerçekten gerekli mi?
+
+### Mevcut Özelliklerin Güvenlik Durumu
+
+| Özellik | Risk | Durum |
+|---|---|---|
+| SwiftData (FocusSession) | Düşük — local, anonim | ✅ Güvenli |
+| UserDefaults (tema tercihi) | Düşük — PII yok | ✅ Güvenli |
+| UNUserNotificationCenter | Düşük — sistem API | ✅ Güvenli |
+| iCloud Sync (Phase 3) | Orta — veri cihaz dışına çıkıyor | ⚠️ CloudKit private DB kullanılacak |
+| Claude API / AI Analiz (Phase 4) | Yüksek — API key + veri gönderimi | ⚠️ Keychain + DataAnonymizer zorunlu |
+| Notion/Obsidian entegrasyonu (Phase 5) | Yüksek — OAuth token | ⚠️ Keychain zorunlu |
+
+---
+
 ## Yol Haritası
 
 ### Phase 1 — MVP
@@ -198,7 +293,7 @@ final class OrnekTests: XCTestCase {
 - [x] Popover arayüz — siyah-beyaz, ultra minimal
 - [x] Menu bar'da kalan süre gösterimi
 - [x] Bildirim desteği (UNUserNotificationCenter)
-- [ ] Tamamlanma alarmı (sistem sesi)
+- [x] Tamamlanma alarmı (sistem sesi — NSSound "Glass")
 
 ### Phase 2 — Tarihçe & Temalar
 - [x] Günlük/haftalık oturum geçmişi (local SwiftData)

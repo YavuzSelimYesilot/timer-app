@@ -11,6 +11,7 @@ struct AppLanguage: Identifiable, Equatable {
 
 // MARK: - LanguageManager
 
+@MainActor
 final class LanguageManager: ObservableObject {
 
     static let supported: [AppLanguage] = [

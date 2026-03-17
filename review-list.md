@@ -34,9 +34,10 @@
 - Tıklayınca önizleme
 > Düzeltmeler: @MainActor eklendi, NSSound sessiz başarısızlık → guard + DEBUG log
 
-## 8. Çoklu Dil Desteği (LanguageManager)
+## ✅ 8. Çoklu Dil Desteği (LanguageManager)
 - TR / EN / DE / JA / ES
 - Runtime switching, Localizable.strings
+> Düzeltme: @MainActor eklendi
 
 ## 9. Streak Sistemi (StreakManager)
 - Günlük seri takibi, en uzun streak

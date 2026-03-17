@@ -188,14 +188,41 @@ final class OrnekTests: XCTestCase {
 
 ---
 
-## Yapılacaklar / Planlanan Özellikler
+## Yol Haritası
 
-- [ ] Bildirim desteği (UserNotifications framework)
-- [ ] Menu bar'da kalan süre gösterimi
-- [ ] Ses efektleri (oturum bitiş sesi)
-- [ ] İstatistik ekranı (günlük/haftalık özet)
-- [ ] Ayarlar paneli (özel preset oluşturma)
-- [ ] Özel tema/renk desteği
+### Phase 1 — MVP
+- [x] macOS menu bar app (SwiftUI + AppKit)
+- [x] Pomodoro döngüsü: 25dk çalışma / 5dk kısa mola / 15dk uzun mola
+- [x] Start / Pause / Reset
+- [x] Preset seçimi (Classic 25/5, Extended 50/10, Sprint 15/3)
+- [x] Popover arayüz — siyah-beyaz, ultra minimal
+- [x] Menu bar'da kalan süre gösterimi
+- [x] Bildirim desteği (UNUserNotificationCenter)
+- [ ] Tamamlanma alarmı (sistem sesi)
+
+### Phase 2 — Tarihçe & Temalar
+- [x] Günlük/haftalık oturum geçmişi (local SwiftData)
+- [ ] Tema sistemi (light, dark, accent renkler)
+- [ ] Menu bar icon animasyonu (progress ring)
+- [ ] Floating window (arka planda timer göster)
+
+### Phase 3 — Ses & Çoklu Dil
+- [ ] Çalışma sırasında ambient müzik (lofi, rain, white noise seçenekleri)
+- [ ] Özel alarm sesleri
+- [ ] TR / EN / DE / JA / ES dil desteği
+- [ ] iCloud sync (cihazlar arası geçmiş)
+
+### Phase 4 — AI & Radio
+- [ ] AI Radio — çalışma süresine göre generative ambient akış (Claude API ile mood detection + müzik öneri)
+- [ ] AI Analiz — oturum verilerinden productivity pattern çıkarma, öneriler
+- [ ] Akıllı mola önerileri (ne zaman durman gerektiğini öğrenen sistem)
+- [ ] Streak sistemi + motivasyon
+
+### Phase 5 — Ekosistem
+- [ ] iOS companion app (telefonda timer sync)
+- [ ] Widgets (macOS + iOS)
+- [ ] Shortcuts app entegrasyonu
+- [ ] Obsidian / Notion entegrasyonu (oturum log'u aktarma)
 
 ---
 

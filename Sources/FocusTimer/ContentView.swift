@@ -127,6 +127,10 @@ struct ContentView: View {
             .padding(.top, 10)
             .padding(.horizontal, 20)
 
+        AIRadioView()
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+
         AlarmSelectorView()
             .padding(.top, 10)
             .padding(.horizontal, 20)

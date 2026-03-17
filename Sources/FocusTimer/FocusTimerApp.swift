@@ -8,38 +8,47 @@ import TimerCore
 struct FocusTimerApp: App {
 
     @StateObject private var engine = TimerEngine()
+    @StateObject private var theme  = ThemeManager()
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
         MenuBarExtra {
             ContentView()
                 .environmentObject(engine)
+                .environmentObject(theme)
         } label: {
-            MenuBarLabel(engine: engine)
+            MenuBarLabel(engine: engine, theme: theme)
         }
         .menuBarExtraStyle(.window)
         .modelContainer(for: FocusSession.self)
     }
 }
 
-// MARK: - Menu Bar Label
+// MARK: - Menu Bar Label (with progress ring)
 
 struct MenuBarLabel: View {
     @ObservedObject var engine: TimerEngine
-
-    private var modeSystemImage: String {
-        switch engine.mode {
-        case .focus:      return "flame.fill"
-        case .shortBreak: return "cup.and.saucer.fill"
-        case .longBreak:  return "moon.zzz.fill"
-        }
-    }
+    @ObservedObject var theme: ThemeManager
 
     var body: some View {
-        HStack(spacing: 3) {
-            Image(systemName: modeSystemImage)
-                .symbolRenderingMode(.hierarchical)
-                .opacity(engine.isRunning ? 1.0 : 0.5)
+        HStack(spacing: 4) {
+            ZStack {
+                Circle()
+                    .stroke(Color.white.opacity(0.22), lineWidth: 1.5)
+                    .frame(width: 14, height: 14)
+
+                Circle()
+                    .trim(from: 0, to: engine.progress)
+                    .stroke(
+                        theme.accentColor,
+                        style: StrokeStyle(lineWidth: 1.5, lineCap: .round)
+                    )
+                    .frame(width: 14, height: 14)
+                    .rotationEffect(.degrees(-90))
+                    .animation(.linear(duration: 1), value: engine.progress)
+            }
+            .opacity(engine.isRunning ? 1.0 : 0.5)
+
             Text(engine.timeString)
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .monospacedDigit()

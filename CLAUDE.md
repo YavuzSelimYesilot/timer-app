@@ -202,9 +202,9 @@ final class OrnekTests: XCTestCase {
 
 ### Phase 2 — Tarihçe & Temalar
 - [x] Günlük/haftalık oturum geçmişi (local SwiftData)
-- [ ] Tema sistemi (light, dark, accent renkler)
-- [ ] Menu bar icon animasyonu (progress ring)
-- [ ] Floating window (arka planda timer göster)
+- [x] Tema sistemi (accent renkler — white/blue/orange/green/pink, UserDefaults kalıcı)
+- [x] Menu bar icon animasyonu (progress ring, accent renkli)
+- [x] Floating window (NSPanel tabanlı floating timer overlay, pip butonu)
 
 ### Phase 3 — Ses & Çoklu Dil
 - [ ] Çalışma sırasında ambient müzik (lofi, rain, white noise seçenekleri)

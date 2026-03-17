@@ -9,8 +9,10 @@ import TimerCore
 
 struct ContentView: View {
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var theme: ThemeManager
     @Environment(\.modelContext) private var modelContext
     @State private var showHistory = false
+    @State private var showFloating = false
     @State private var cancellables = Set<AnyCancellable>()
 
     var body: some View {
@@ -21,6 +23,17 @@ struct ContentView: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.white.opacity(0.25))
                 Spacer()
+                // Floating window toggle
+                Button {
+                    FloatingTimerController.shared.toggle(engine: engine, theme: theme)
+                    showFloating = FloatingTimerController.shared.isVisible
+                } label: {
+                    Image(systemName: showFloating ? "pip.fill" : "pip")
+                        .font(.system(size: 12))
+                        .foregroundColor(showFloating ? .white : .white.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+
                 Button {
                     showHistory.toggle()
                 } label: {
@@ -73,9 +86,13 @@ struct ContentView: View {
             .padding(.top, 16)
             .padding(.horizontal, 20)
 
+        ThemeSelectorView()
+            .padding(.top, 10)
+            .padding(.horizontal, 20)
+
         Divider()
             .background(Color.white.opacity(0.06))
-            .padding(.top, 18)
+            .padding(.top, 12)
 
         QuitButtonView()
             .padding(.vertical, 10)
@@ -152,6 +169,7 @@ struct ModeSelectorView: View {
 
 struct TimerRingView: View {
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var theme: ThemeManager
     @State private var isDragging = false
     @State private var dragMinutes: Int = 0
 
@@ -182,7 +200,7 @@ struct TimerRingView: View {
                 Circle()
                     .trim(from: 0, to: engine.progress)
                     .stroke(
-                        Color.white,
+                        theme.accentColor,
                         style: StrokeStyle(lineWidth: 5, lineCap: .round)
                     )
                     .rotationEffect(.degrees(-90))
@@ -193,7 +211,7 @@ struct TimerRingView: View {
                     let angle = engine.progress * 2 * .pi - .pi / 2
                     let r = (geo.size.width / 2) - 2.5
                     Circle()
-                        .fill(Color.white)
+                        .fill(theme.accentColor)
                         .frame(width: isDragging ? 11 : 8, height: isDragging ? 11 : 8)
                         .shadow(color: .white.opacity(0.4), radius: isDragging ? 4 : 0)
                         .offset(
@@ -257,12 +275,13 @@ struct TimerRingView: View {
 
 struct SessionDotsView: View {
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var theme: ThemeManager
 
     var body: some View {
         HStack(spacing: 7) {
             ForEach(0..<4) { i in
                 Circle()
-                    .fill(i < engine.sessionsInCycle ? Color.white : Color.white.opacity(0.15))
+                    .fill(i < engine.sessionsInCycle ? theme.accentColor : Color.white.opacity(0.15))
                     .frame(width: 6, height: 6)
                     .animation(.easeInOut(duration: 0.3), value: engine.sessionsInCycle)
             }
@@ -274,6 +293,7 @@ struct SessionDotsView: View {
 
 struct ControlButtonsView: View {
     @EnvironmentObject var engine: TimerEngine
+    @EnvironmentObject var theme: ThemeManager
 
     var body: some View {
         HStack(spacing: 14) {
@@ -283,7 +303,7 @@ struct ControlButtonsView: View {
             }
 
             CircleButton(icon: engine.isRunning ? "pause.fill" : "play.fill",
-                         size: 58, iconSize: 20, foreground: .black, background: .white) {
+                         size: 58, iconSize: 20, foreground: .black, background: theme.accentColor) {
                 engine.toggle()
             }
 
@@ -370,6 +390,39 @@ struct PresetSelectorView: View {
 
     private func isActive(_ preset: TimerPreset) -> Bool {
         engine.preset == preset && !engine.hasCustomDuration
+    }
+}
+
+// MARK: - Theme Selector
+
+struct ThemeSelectorView: View {
+    @EnvironmentObject var theme: ThemeManager
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("ACCENT")
+                .font(.system(size: 9, weight: .semibold))
+                .foregroundColor(.white.opacity(0.2))
+                .tracking(1.5)
+            Spacer()
+            HStack(spacing: 6) {
+                ForEach(AccentColor.allCases) { accent in
+                    Button {
+                        theme.accent = accent
+                    } label: {
+                        Circle()
+                            .fill(accent.color)
+                            .frame(width: 12, height: 12)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white, lineWidth: theme.accent == accent ? 1.5 : 0)
+                                    .padding(-2)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 }
 

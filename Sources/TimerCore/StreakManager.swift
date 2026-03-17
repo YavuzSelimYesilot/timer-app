@@ -60,7 +60,7 @@ public final class StreakManager: ObservableObject {
 
         if daysDiff > 1 {
             currentStreak = 0
-            defaults.set(0, forKey: Keys.currentStreak)
+            persist(lastActiveDate: lastDate)
         }
     }
 

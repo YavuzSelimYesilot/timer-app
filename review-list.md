@@ -39,9 +39,10 @@
 - Runtime switching, Localizable.strings
 > Düzeltme: @MainActor eklendi
 
-## 9. Streak Sistemi (StreakManager)
+## ✅ 9. Streak Sistemi (StreakManager)
 - Günlük seri takibi, en uzun streak
 - Milestone animasyonu
+> Düzeltme: validateStreak'te direkt defaults.set → persist() ile tutarlı hale getirildi
 
 ## 10. Akıllı Mola Önerileri (BreakSuggestionView)
 - Oturum verisinden öneri üretme

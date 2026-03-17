@@ -1,17 +1,19 @@
 # Code Review Listesi
 
-## 1. TimerCore — İş Mantığı Katmanı
+## ✅ 1. TimerCore — İş Mantığı Katmanı
 - `TimerEngine` (state yönetimi, tick, mod geçişleri, preset, publisher)
 - `CircularMath` (minutesFromAngle, roundedToNearest)
 - `Models` (TimerMode, TimerPreset)
+> Düzeltmeler: `roundedToNearest` integer division bug, Published setter'lar `internal(set)` yapıldı
 
 ## 2. Circular Slider & Timer Ring (ContentView)
 - Dairesel drag gesture, açı → dakika hesabı
 - `setDuration` ile TimerEngine entegrasyonu
 
-## 3. Session History — SwiftData (HistoryView)
+## ✅ 3. Session History — SwiftData (HistoryView)
 - `FocusSession` modeli
 - Günlük/haftalık listeleme
+> Düzeltmeler: sessiz mode fallback'e DEBUG log eklendi, DateFormatter static yapıldı
 
 ## 4. Tema Sistemi (ThemeManager)
 - Accent renk seçimi, UserDefaults kalıcılığı

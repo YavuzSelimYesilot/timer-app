@@ -17,7 +17,11 @@ final class FocusSession {
     }
 
     var mode: TimerMode {
-        TimerMode(rawValue: modeRaw) ?? .focus
+        if let m = TimerMode(rawValue: modeRaw) { return m }
+        #if DEBUG
+        print("[FocusSession] Bilinmeyen modeRaw: '\(modeRaw)', .focus kullanılıyor")
+        #endif
+        return .focus
     }
 }
 
@@ -199,10 +203,14 @@ struct WeeklyBarChart: View {
         Calendar.current.isDateInToday(date)
     }
 
-    private func dayLabel(_ date: Date) -> String {
+    private static let dayFormatter: DateFormatter = {
         let f = DateFormatter()
         f.dateFormat = "EEE"
-        return String(f.string(from: date).prefix(1))
+        return f
+    }()
+
+    private func dayLabel(_ date: Date) -> String {
+        String(Self.dayFormatter.string(from: date).prefix(1))
     }
 }
 
@@ -245,18 +253,29 @@ struct SessionRowView: View {
         }
     }
 
-    private var formattedDate: String {
+    private static let timeFormatter: DateFormatter = {
         let f = DateFormatter()
-        f.locale = Locale(identifier: lang.currentLanguage.code)
+        f.dateFormat = "HH:mm"
+        return f
+    }()
+
+    private static let fullFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMM d, HH:mm"
+        return f
+    }()
+
+    private var formattedDate: String {
+        let locale = Locale(identifier: lang.currentLanguage.code)
         if Calendar.current.isDateInToday(session.date) {
-            f.dateFormat = "HH:mm"
-            return String(format: lang.loc("history.date.today"), f.string(from: session.date))
+            Self.timeFormatter.locale = locale
+            return String(format: lang.loc("history.date.today"), Self.timeFormatter.string(from: session.date))
         } else if Calendar.current.isDateInYesterday(session.date) {
-            f.dateFormat = "HH:mm"
-            return String(format: lang.loc("history.date.yesterday"), f.string(from: session.date))
+            Self.timeFormatter.locale = locale
+            return String(format: lang.loc("history.date.yesterday"), Self.timeFormatter.string(from: session.date))
         } else {
-            f.dateFormat = "MMM d, HH:mm"
-            return f.string(from: session.date)
+            Self.fullFormatter.locale = locale
+            return Self.fullFormatter.string(from: session.date)
         }
     }
 }

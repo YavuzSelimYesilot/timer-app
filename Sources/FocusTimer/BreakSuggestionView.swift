@@ -5,7 +5,6 @@ import TimerCore
 // MARK: - Break Suggestion Banner
 
 struct BreakSuggestionView: View {
-    @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var streak: StreakManager
     @Query private var allSessions: [FocusSession]
     @State private var dismissed = false
@@ -21,8 +20,7 @@ struct BreakSuggestionView: View {
 
         return BreakAdvisor.evaluate(
             todaySessions: todaySessions,
-            currentStreak: streak.currentStreak,
-            currentMode: engine.mode
+            currentStreak: streak.currentStreak
         )
     }
 
@@ -37,6 +35,8 @@ struct BreakSuggestionView: View {
             ))
         }
     }
+    // Yeni oturum kaydedilince dismissed sıfırla — yeni öneri gösterilebilsin
+    .onChange(of: allSessions.count) { dismissed = false }
 }
 
 // MARK: - Banner Card

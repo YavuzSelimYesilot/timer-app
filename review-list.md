@@ -44,9 +44,10 @@
 - Milestone animasyonu
 > Düzeltme: validateStreak'te direkt defaults.set → persist() ile tutarlı hale getirildi
 
-## 10. Akıllı Mola Önerileri (BreakSuggestionView)
+## ✅ 10. Akıllı Mola Önerileri (BreakSuggestionView)
 - Oturum verisinden öneri üretme
 - Gösterim koşulları ve UI
+> Düzeltmeler: currentMode dead code parametresi kaldırıldı, dismissed onChange ile sıfırlanıyor
 
 ## 11. AI Radio (AIRadioService + AIRadioView + KeychainService)
 - Keychain API key yönetimi

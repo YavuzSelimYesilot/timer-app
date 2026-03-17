@@ -40,7 +40,6 @@ public enum BreakAdvisor {
     public static func evaluate(
         todaySessions: [SessionRecord],
         currentStreak: Int,
-        currentMode: TimerMode,
         now: Date = Date()
     ) -> BreakSuggestion? {
 

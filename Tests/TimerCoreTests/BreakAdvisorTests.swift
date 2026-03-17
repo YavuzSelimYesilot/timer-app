@@ -9,7 +9,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: [],
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertNil(result)
     }
@@ -18,7 +17,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: [session(.focus)],
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertNil(result)
     }
@@ -28,7 +26,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertNil(result)
     }
@@ -40,7 +37,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertEqual(result?.kind, .shortBreak)
         XCTAssertEqual(result?.urgency, 1)
@@ -53,7 +49,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertEqual(result?.kind, .longBreak)
         XCTAssertEqual(result?.urgency, 2)
@@ -64,7 +59,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertEqual(result?.kind, .longBreak)
     }
@@ -77,7 +71,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertNil(result)
     }
@@ -92,7 +85,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus
         )
         XCTAssertNil(result)
     }
@@ -105,7 +97,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus,
             now: evening
         )
         XCTAssertEqual(result?.kind, .stopForDay)
@@ -118,7 +109,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus,
             now: evening
         )
         XCTAssertNil(result)
@@ -130,7 +120,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
-            currentMode: .focus,
             now: lateNight
         )
         XCTAssertEqual(result?.kind, .stopForDay)
@@ -142,7 +131,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: [session(.focus)],
             currentStreak: 7,
-            currentMode: .focus
         )
         XCTAssertEqual(result?.kind, .wellDone)
         XCTAssertEqual(result?.urgency, 1)
@@ -152,7 +140,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: [session(.focus)],
             currentStreak: 5,
-            currentMode: .focus
         )
         XCTAssertNil(result)
     }
@@ -164,7 +151,6 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 7,
-            currentMode: .focus,
             now: hour(19)
         )
         XCTAssertEqual(result?.kind, .stopForDay)

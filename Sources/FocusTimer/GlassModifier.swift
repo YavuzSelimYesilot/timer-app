@@ -9,6 +9,7 @@ extension View {
     func glassContainer() -> some View {
         if #available(macOS 26, *) {
             self.background(.clear)
+                .containerBackground(.clear, for: .window)
         } else {
             self.background(Color(red: 0.07, green: 0.07, blue: 0.07))
         }
@@ -16,19 +17,27 @@ extension View {
 
     /// Capsule glass — for pills, tags, preset selectors.
     @ViewBuilder
-    func glassCapsule(fallback: Color = Color.white.opacity(0.12)) -> some View {
+    func glassCapsule(isActive: Bool = true, fallback: Color = Color.primary.opacity(0.12)) -> some View {
         if #available(macOS 26, *) {
-            self.clipShape(Capsule()).glassEffect(.regular)
+            if isActive {
+                self.glassEffect(.regular, in: .capsule)
+            } else {
+                self
+            }
         } else {
-            self.background(fallback).clipShape(Capsule())
+            if isActive {
+                self.background(fallback).clipShape(Capsule())
+            } else {
+                self
+            }
         }
     }
 
     /// Circle glass — for round buttons.
     @ViewBuilder
-    func glassCircle(fallback: Color = Color.white.opacity(0.07)) -> some View {
+    func glassCircle(fallback: Color = Color.primary.opacity(0.07)) -> some View {
         if #available(macOS 26, *) {
-            self.clipShape(Circle()).glassEffect(.regular)
+            self.glassEffect(.regular, in: .circle)
         } else {
             self.background(fallback).clipShape(Circle())
         }
@@ -36,19 +45,19 @@ extension View {
 
     /// Rounded rect glass — for cards, input fields, segmented controls.
     @ViewBuilder
-    func glassRoundedRect(cornerRadius: CGFloat = 8, fallback: Color = Color.white.opacity(0.05)) -> some View {
+    func glassRoundedRect(cornerRadius: CGFloat = 8, fallback: Color = Color.primary.opacity(0.05)) -> some View {
         if #available(macOS 26, *) {
-            self.clipShape(RoundedRectangle(cornerRadius: cornerRadius)).glassEffect(.regular)
+            self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: cornerRadius))
         } else {
             self.background(fallback).clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         }
     }
 
-    /// Interactive glass — for buttons that need press feedback.
+    /// Interactive glass circle — for buttons that need press feedback.
     @ViewBuilder
-    func glassInteractiveCircle(fallback: Color = Color.white.opacity(0.07)) -> some View {
+    func glassInteractiveCircle(fallback: Color = Color.primary.opacity(0.07)) -> some View {
         if #available(macOS 26, *) {
-            self.clipShape(Circle()).glassEffect(.regular.interactive())
+            self.glassEffect(.regular.interactive(), in: .circle)
         } else {
             self.background(fallback).clipShape(Circle())
         }

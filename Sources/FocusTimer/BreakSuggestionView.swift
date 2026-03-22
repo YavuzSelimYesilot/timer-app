@@ -36,7 +36,6 @@ struct BreakSuggestionView: View {
                 ))
             }
         }
-        // Yeni oturum kaydedilince dismissed sifirla, yeni oneri gosterilebilsin.
         .onChange(of: allSessions.count, initial: false) { _, _ in
             dismissed = false
         }
@@ -51,10 +50,10 @@ private struct BannerCard: View {
 
     private var accentColor: Color {
         switch suggestion.kind {
-        case .shortBreak:  return .white.opacity(0.5)
-        case .longBreak:   return .orange.opacity(0.7)
-        case .stopForDay:  return .red.opacity(0.6)
-        case .wellDone:    return .white.opacity(0.6)
+        case .shortBreak:  return .gray
+        case .longBreak:   return .orange
+        case .stopForDay:  return .red
+        case .wellDone:    return .green
         }
     }
 
@@ -71,13 +70,13 @@ private struct BannerCard: View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: icon)
                 .font(.system(size: 11))
-                .foregroundColor(accentColor)
+                .foregroundStyle(accentColor)
                 .frame(width: 18)
                 .padding(.top, 1)
 
             Text(suggestion.message)
                 .font(.system(size: 10))
-                .foregroundColor(.white.opacity(0.6))
+                .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .lineSpacing(2)
 
@@ -86,7 +85,7 @@ private struct BannerCard: View {
             Button(action: onDismiss) {
                 Image(systemName: "xmark")
                     .font(.system(size: 8, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.25))
+                    .foregroundStyle(.tertiary)
                     .frame(width: 16, height: 16)
             }
             .buttonStyle(.plain)
@@ -95,7 +94,7 @@ private struct BannerCard: View {
         .padding(.vertical, 8)
         .glassRoundedRect(
             cornerRadius: 8,
-            fallback: Color.white.opacity(suggestion.urgency == 3 ? 0.06 : 0.04)
+            fallback: Color.primary.opacity(suggestion.urgency == 3 ? 0.06 : 0.04)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 8)

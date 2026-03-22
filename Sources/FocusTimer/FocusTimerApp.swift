@@ -56,7 +56,7 @@ struct MenuBarLabel: View {
         HStack(spacing: 4) {
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.22), lineWidth: 1.5)
+                    .stroke(Color.primary.opacity(0.22), lineWidth: 1.5)
                     .frame(width: 14, height: 14)
 
                 Circle()

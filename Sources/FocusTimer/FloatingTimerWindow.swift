@@ -75,7 +75,7 @@ struct FloatingTimerView: View {
             // Mini progress ring
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(0.15), lineWidth: 2.5)
+                    .stroke(Color.primary.opacity(0.15), lineWidth: 2.5)
                 Circle()
                     .trim(from: 0, to: engine.progress)
                     .stroke(
@@ -91,12 +91,12 @@ struct FloatingTimerView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(engine.timeString)
                     .font(.system(size: 22, weight: .thin, design: .monospaced))
-                    .foregroundColor(.white)
+                    .foregroundStyle(.primary)
                     .monospacedDigit()
                 Text(LocalizedStringKey(engine.mode.locKey), bundle: lang.bundle)
                     .textCase(.uppercase)
                     .font(.system(size: 8, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundStyle(.tertiary)
                     .tracking(1.5)
             }
 
@@ -105,9 +105,9 @@ struct FloatingTimerView: View {
             Button { engine.toggle() } label: {
                 Image(systemName: engine.isRunning ? "pause.fill" : "play.fill")
                     .font(.system(size: 11, weight: .medium))
-                    .foregroundColor(theme.accentColor)
+                    .foregroundStyle(theme.accentColor)
                     .frame(width: 28, height: 28)
-                    .glassCircle(fallback: Color.white.opacity(0.08))
+                    .glassCircle(fallback: Color.primary.opacity(0.08))
             }
             .buttonStyle(.plain)
         }

@@ -29,16 +29,16 @@ struct DailyTaskView: View {
             HStack {
                 Text("tasks.title", bundle: lang.bundle)
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundStyle(.secondary)
                 Spacer()
                 if !todayTasks.isEmpty {
                     Text("\(todayTasks.filter(\.isCompleted).count)/\(todayTasks.count)")
                         .font(.system(size: 10, weight: .medium, design: .monospaced))
-                        .foregroundColor(.white.opacity(0.3))
+                        .foregroundStyle(.tertiary)
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
             .padding(.bottom, 8)
 
             // Completion progress bar
@@ -46,7 +46,7 @@ struct DailyTaskView: View {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
                         RoundedRectangle(cornerRadius: 1.5)
-                            .fill(Color.white.opacity(0.06))
+                            .fill(Color.primary.opacity(0.06))
                             .frame(height: 3)
                         RoundedRectangle(cornerRadius: 1.5)
                             .fill(theme.accentColor)
@@ -55,7 +55,7 @@ struct DailyTaskView: View {
                     }
                 }
                 .frame(height: 3)
-                .padding(.horizontal, 20)
+                .padding(.horizontal, 16)
                 .padding(.bottom, 10)
             }
 
@@ -64,18 +64,17 @@ struct DailyTaskView: View {
                 let task = DailyTask(title: title)
                 modelContext.insert(task)
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
             .padding(.bottom, 8)
 
             Divider()
-                .background(Color.white.opacity(0.06))
 
             // Task list
             if sortedTasks.isEmpty {
                 VStack(spacing: 6) {
                     Text("tasks.empty", bundle: lang.bundle)
                         .font(.system(size: 12, weight: .light))
-                        .foregroundColor(.white.opacity(0.25))
+                        .foregroundStyle(.tertiary)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 30)
@@ -87,7 +86,6 @@ struct DailyTaskView: View {
                                 toggleTask(id: item.id)
                             }
                             Divider()
-                                .background(Color.white.opacity(0.04))
                                 .padding(.leading, 40)
                         }
                     }
@@ -127,12 +125,11 @@ private struct TaskInputField: View {
             HStack(spacing: 8) {
                 Image(systemName: "plus.circle")
                     .font(.system(size: 12))
-                    .foregroundColor(.white.opacity(0.2))
+                    .foregroundStyle(.quaternary)
 
                 TextField(lang.loc("tasks.input.placeholder"), text: $input)
                     .textFieldStyle(.plain)
                     .font(.system(size: 12))
-                    .foregroundColor(.white.opacity(0.8))
                     .onSubmit { submitTask() }
                     .onChange(of: input) { _, newValue in
                         showSuggestions = !newValue.trimmingCharacters(in: .whitespaces).isEmpty
@@ -140,7 +137,7 @@ private struct TaskInputField: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
-            .glassRoundedRect(cornerRadius: 8, fallback: Color.white.opacity(0.05))
+            .glassRoundedRect(cornerRadius: 8, fallback: Color.primary.opacity(0.05))
 
             if showSuggestions && !suggestions.isEmpty {
                 VStack(spacing: 0) {
@@ -153,11 +150,11 @@ private struct TaskInputField: View {
                             HStack {
                                 Text(verbatim: suggestion)
                                     .font(.system(size: 11))
-                                    .foregroundColor(.white.opacity(0.5))
+                                    .foregroundStyle(.secondary)
                                 Spacer()
                                 Text("Tab ↹")
                                     .font(.system(size: 8))
-                                    .foregroundColor(.white.opacity(0.15))
+                                    .foregroundStyle(.quaternary)
                             }
                             .padding(.horizontal, 10)
                             .padding(.vertical, 5)
@@ -165,7 +162,7 @@ private struct TaskInputField: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .glassRoundedRect(cornerRadius: 6, fallback: Color.white.opacity(0.04))
+                .glassRoundedRect(cornerRadius: 6, fallback: Color.primary.opacity(0.04))
                 .padding(.top, 2)
             }
         }
@@ -193,16 +190,16 @@ private struct TaskRowView: View {
             HStack(spacing: 10) {
                 Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(size: 14))
-                    .foregroundColor(item.isCompleted ? theme.accentColor : .white.opacity(0.2))
+                    .foregroundColor(item.isCompleted ? theme.accentColor : .gray.opacity(0.4))
 
                 Text(verbatim: item.title)
                     .font(.system(size: 12))
-                    .foregroundColor(item.isCompleted ? .white.opacity(0.25) : .white.opacity(0.7))
-                    .strikethrough(item.isCompleted, color: .white.opacity(0.15))
+                    .foregroundStyle(item.isCompleted ? .tertiary : .primary)
+                    .strikethrough(item.isCompleted, color: .secondary)
 
                 Spacer()
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
             .padding(.vertical, 8)
             .contentShape(Rectangle())
         }

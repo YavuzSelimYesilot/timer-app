@@ -23,64 +23,38 @@ struct ContentView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
-            HStack {
+            // Header toolbar
+            HStack(spacing: 6) {
                 Text("FocusTimer")
                     .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.25))
+                    .foregroundStyle(.tertiary)
                 Spacer()
-                Button {
-                    floatingController.toggle(engine: engine, theme: theme, lang: lang)
-                } label: {
-                    Image(systemName: floatingController.isVisible ? "pip.fill" : "pip")
-                        .font(.system(size: 12))
-                        .foregroundColor(floatingController.isVisible ? .white : .white.opacity(0.3))
-                }
-                .buttonStyle(.plain)
 
-                Button {
+                toolbarButton(icon: floatingController.isVisible ? "pip.fill" : "pip",
+                              isActive: floatingController.isVisible) {
+                    floatingController.toggle(engine: engine, theme: theme, lang: lang)
+                }
+                toolbarButton(icon: "chart.bar.fill", isActive: showHistory) {
                     showHistory.toggle()
                     if showHistory { showSettings = false; showTasks = false; showDevAssistant = false }
-                } label: {
-                    Image(systemName: "chart.bar.fill")
-                        .font(.system(size: 12))
-                        .foregroundColor(showHistory ? .white : .white.opacity(0.3))
                 }
-                .buttonStyle(.plain)
-
-                Button {
+                toolbarButton(icon: showTasks ? "checklist.checked" : "checklist", isActive: showTasks) {
                     showTasks.toggle()
                     if showTasks { showHistory = false; showSettings = false; showDevAssistant = false }
-                } label: {
-                    Image(systemName: showTasks ? "checklist.checked" : "checklist")
-                        .font(.system(size: 12))
-                        .foregroundColor(showTasks ? .white : .white.opacity(0.3))
                 }
-                .buttonStyle(.plain)
-
-                Button {
+                toolbarButton(icon: showSettings ? "gearshape.fill" : "gearshape", isActive: showSettings) {
                     showSettings.toggle()
                     if showSettings { showHistory = false; showTasks = false; showDevAssistant = false }
-                } label: {
-                    Image(systemName: showSettings ? "gearshape.fill" : "gearshape")
-                        .font(.system(size: 12))
-                        .foregroundColor(showSettings ? .white : .white.opacity(0.3))
                 }
-                .buttonStyle(.plain)
-
-                Button {
+                toolbarButton(icon: showDevAssistant ? "wrench.and.screwdriver.fill" : "wrench.and.screwdriver",
+                              isActive: showDevAssistant) {
                     showDevAssistant.toggle()
                     if showDevAssistant { showHistory = false; showSettings = false; showTasks = false }
-                } label: {
-                    Image(systemName: showDevAssistant ? "wrench.and.screwdriver.fill" : "wrench.and.screwdriver")
-                        .font(.system(size: 12))
-                        .foregroundColor(showDevAssistant ? .white : .white.opacity(0.3))
                 }
-                .buttonStyle(.plain)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 18)
-            .padding(.bottom, 12)
+            .padding(.horizontal, 16)
+            .padding(.top, 14)
+            .padding(.bottom, 10)
 
             if showDevAssistant {
                 DevAssistantView()
@@ -126,10 +100,19 @@ struct ContentView: View {
         }
     }
 
+    private func toolbarButton(icon: String, isActive: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 12))
+                .foregroundStyle(isActive ? .primary : .tertiary)
+        }
+        .buttonStyle(.plain)
+    }
+
     @ViewBuilder
     private var timerBody: some View {
         ModeSelectorView()
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
 
         TimerRingView()
             .frame(width: 164, height: 164)
@@ -140,14 +123,14 @@ struct ContentView: View {
 
         StreakRowView()
             .padding(.top, 12)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
 
         ControlButtonsView()
             .padding(.top, 22)
+            .padding(.bottom, 16)
 
         BreakSuggestionView()
-            .padding(.top, 10)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
             .padding(.bottom, 16)
             .animation(.easeInOut(duration: 0.25), value: engine.completedSessions)
     }
@@ -170,8 +153,6 @@ struct ContentView: View {
     }
 
     private func sendNotification(for mode: TimerMode, completedSessions: Int) {
-        // swift run ile çalıştırıldığında .app bundle olmadığı için
-        // UNUserNotificationCenter crash verir — guard ile koru.
         guard Bundle.main.bundleURL.pathExtension == "app" else { return }
 
         let content = UNMutableNotificationContent()
@@ -202,29 +183,38 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Mode Selector
+// MARK: - Mode Selector (native Picker)
 
 struct ModeSelectorView: View {
     @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var lang: LanguageManager
 
+    @State private var selectedMode: TimerMode = .focus
+
     var body: some View {
         HStack(spacing: 0) {
             ForEach(TimerMode.allCases, id: \.self) { mode in
-                Button { engine.switchMode(mode) } label: {
+                Button {
+                    selectedMode = mode
+                } label: {
                     Text(LocalizedStringKey(mode.shortLocKey), bundle: lang.bundle)
                         .font(.system(size: 11, weight: .medium))
-                        .foregroundColor(engine.mode == mode ? .white : .white.opacity(0.3))
+                        .foregroundStyle(selectedMode == mode ? .primary : .tertiary)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
-                        .background(engine.mode == mode ? Color.white.opacity(0.1) : Color.clear)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                        .glassCapsule(isActive: selectedMode == mode, fallback: Color.primary.opacity(0.1))
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(3)
-        .glassRoundedRect(cornerRadius: 8, fallback: Color.white.opacity(0.05))
+        .glassRoundedRect(cornerRadius: 8)
+        .onAppear { selectedMode = engine.mode }
+        .onChange(of: engine.mode) { _, newValue in selectedMode = newValue }
+        .onChange(of: selectedMode) { _, newValue in
+            guard newValue != engine.mode else { return }
+            engine.switchMode(newValue)
+        }
     }
 }
 
@@ -251,11 +241,11 @@ struct TimerRingView: View {
 
             ZStack {
                 Circle()
-                    .stroke(Color.white.opacity(isDragging ? 0.06 : 0.0), lineWidth: 18)
+                    .stroke(Color.primary.opacity(isDragging ? 0.06 : 0.0), lineWidth: 18)
                     .animation(.easeInOut(duration: 0.15), value: isDragging)
 
                 Circle()
-                    .stroke(Color.white.opacity(0.08), lineWidth: 5)
+                    .stroke(Color.primary.opacity(0.08), lineWidth: 5)
 
                 Circle()
                     .trim(from: 0, to: engine.progress)
@@ -272,7 +262,7 @@ struct TimerRingView: View {
                     Circle()
                         .fill(theme.accentColor)
                         .frame(width: isDragging ? 11 : 8, height: isDragging ? 11 : 8)
-                        .shadow(color: .white.opacity(0.4), radius: isDragging ? 4 : 0)
+                        .shadow(color: theme.accentColor.opacity(0.4), radius: isDragging ? 4 : 0)
                         .offset(x: r * cos(angle), y: r * sin(angle))
                         .animation(.easeInOut(duration: 0.15), value: isDragging)
                 }
@@ -281,22 +271,22 @@ struct TimerRingView: View {
                     if isDragging {
                         Text("\(dragMinutes)")
                             .font(.system(size: 40, weight: .thin, design: .monospaced))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.primary)
                             .transition(.opacity)
                         Text("timer.minutes.label", bundle: lang.bundle)
                             .font(.system(size: 8, weight: .semibold))
-                            .foregroundColor(.white.opacity(0.4))
+                            .foregroundStyle(.tertiary)
                             .tracking(2)
                     } else {
                         Text(engine.timeString)
                             .font(.system(size: 40, weight: .thin, design: .monospaced))
-                            .foregroundColor(.white)
+                            .foregroundStyle(.primary)
                             .monospacedDigit()
                             .transition(.opacity)
                         Text(LocalizedStringKey(engine.mode.locKey), bundle: lang.bundle)
                             .textCase(.uppercase)
                             .font(.system(size: 8, weight: .semibold))
-                            .foregroundColor(.white.opacity(engine.hasCustomDuration ? 0.6 : 0.35))
+                            .foregroundStyle(engine.hasCustomDuration ? .secondary : .tertiary)
                             .tracking(2)
                     }
                 }
@@ -335,7 +325,7 @@ struct SessionDotsView: View {
         HStack(spacing: 7) {
             ForEach(0..<4) { i in
                 Circle()
-                    .fill(i < engine.sessionsInCycle ? theme.accentColor : Color.white.opacity(0.15))
+                    .fill(i < engine.sessionsInCycle ? theme.accentColor : Color.primary.opacity(0.15))
                     .frame(width: 6, height: 6)
                     .animation(.easeInOut(duration: 0.3), value: engine.sessionsInCycle)
             }
@@ -354,10 +344,10 @@ struct StreakRowView: View {
             HStack(spacing: 4) {
                 Image(systemName: "flame.fill")
                     .font(.system(size: 9))
-                    .foregroundColor(streak.currentStreak > 0 ? theme.accentColor : .white.opacity(0.15))
+                    .foregroundColor(streak.currentStreak > 0 ? theme.accentColor : .gray.opacity(0.4))
                 Text("\(streak.currentStreak)")
                     .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                    .foregroundColor(streak.currentStreak > 0 ? .white.opacity(0.7) : .white.opacity(0.2))
+                    .foregroundStyle(streak.currentStreak > 0 ? .secondary : .quaternary)
             }
             .scaleEffect(streak.streakMilestone != nil ? 1.15 : 1.0)
             .animation(.spring(response: 0.3, dampingFraction: 0.5), value: streak.currentStreak)
@@ -367,10 +357,10 @@ struct StreakRowView: View {
             HStack(spacing: 4) {
                 Image(systemName: "trophy.fill")
                     .font(.system(size: 9))
-                    .foregroundColor(.white.opacity(0.15))
+                    .foregroundStyle(.quaternary)
                 Text("\(streak.longestStreak)")
                     .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundColor(.white.opacity(0.2))
+                    .foregroundStyle(.quaternary)
             }
         }
     }
@@ -383,21 +373,38 @@ struct ControlButtonsView: View {
     @EnvironmentObject var theme: ThemeManager
 
     var body: some View {
+        controlButtons
+    }
+
+    private var controlButtons: some View {
         HStack(spacing: 14) {
-            CircleButton(icon: "arrow.counterclockwise", size: 44, iconSize: 14,
-                         foreground: .white.opacity(0.55), background: .white.opacity(0.07)) {
-                engine.reset()
+            Button { engine.reset() } label: {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 44, height: 44)
+                    .glassInteractiveCircle()
             }
+            .buttonStyle(.plain)
 
-            CircleButton(icon: engine.isRunning ? "pause.fill" : "play.fill",
-                         size: 58, iconSize: 20, foreground: .black, background: theme.accentColor) {
-                engine.toggle()
+            Button { engine.toggle() } label: {
+                Image(systemName: engine.isRunning ? "pause.fill" : "play.fill")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .frame(width: 58, height: 58)
+                    .glassInteractiveCircle()
             }
+            .buttonStyle(.plain)
+            .tint(theme.accentColor)
 
-            CircleButton(icon: "forward.end.fill", size: 44, iconSize: 14,
-                         foreground: .white.opacity(0.55), background: .white.opacity(0.07)) {
-                skipToNext()
+            Button { skipToNext() } label: {
+                Image(systemName: "forward.end.fill")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 44, height: 44)
+                    .glassInteractiveCircle()
             }
+            .buttonStyle(.plain)
         }
     }
 
@@ -408,26 +415,6 @@ struct ControlButtonsView: View {
         case .shortBreak, .longBreak:
             engine.switchMode(.focus)
         }
-    }
-}
-
-struct CircleButton: View {
-    let icon: String
-    let size: CGFloat
-    let iconSize: CGFloat
-    let foreground: Color
-    let background: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Image(systemName: icon)
-                .font(.system(size: iconSize, weight: .medium))
-                .foregroundColor(foreground)
-                .frame(width: size, height: size)
-                .glassCircle(fallback: background)
-        }
-        .buttonStyle(.plain)
     }
 }
 
@@ -443,16 +430,16 @@ struct PresetSelectorView: View {
                 Button { engine.applyPreset(preset) } label: {
                     Text(verbatim: preset.name)
                         .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(isActive(preset) ? .white : .white.opacity(0.35))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .glassCapsule(fallback: isActive(preset) ? Color.white.opacity(0.12) : Color.clear)
-                        .overlay(
-                            Capsule()
-                                .stroke(Color.white.opacity(isActive(preset) ? 0 : 0.1), lineWidth: 1)
-                        )
                 }
                 .buttonStyle(.plain)
+                .foregroundStyle(isActive(preset) ? .primary : .tertiary)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .glassCapsule(isActive: isActive(preset), fallback: Color.primary.opacity(0.12))
+                .overlay(
+                    Capsule()
+                        .stroke(Color.primary.opacity(isActive(preset) ? 0 : 0.1), lineWidth: 1)
+                )
             }
 
             Spacer()
@@ -460,14 +447,14 @@ struct PresetSelectorView: View {
             if engine.hasCustomDuration {
                 Text("preset.custom", bundle: lang.bundle)
                     .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.white.opacity(0.4))
+                    .foregroundStyle(.tertiary)
                     .padding(.horizontal, 7)
                     .padding(.vertical, 4)
-                    .glassCapsule(fallback: Color.white.opacity(0.08))
+                    .glassCapsule(fallback: Color.primary.opacity(0.08))
             } else {
                 Text("\(engine.currentDurationMinutes)m")
                     .font(.system(size: 10, weight: .regular))
-                    .foregroundColor(.white.opacity(0.2))
+                    .foregroundStyle(.quaternary)
             }
         }
     }
@@ -487,7 +474,7 @@ struct ThemeSelectorView: View {
         HStack(spacing: 8) {
             Text("theme.accent.label", bundle: lang.bundle)
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundColor(.white.opacity(0.2))
+                .foregroundStyle(.quaternary)
                 .tracking(1.5)
             Spacer()
             HStack(spacing: 6) {
@@ -500,7 +487,7 @@ struct ThemeSelectorView: View {
                             .frame(width: 12, height: 12)
                             .overlay(
                                 Circle()
-                                    .stroke(Color.white, lineWidth: theme.accent == accent ? 1.5 : 0)
+                                    .stroke(Color.primary, lineWidth: theme.accent == accent ? 1.5 : 0)
                                     .padding(-2)
                             )
                     }
@@ -523,7 +510,7 @@ struct AmbientSelectorView: View {
             HStack(spacing: 8) {
                 Text("ambient.label", bundle: lang.bundle)
                     .font(.system(size: 9, weight: .semibold))
-                    .foregroundColor(.white.opacity(0.2))
+                    .foregroundStyle(.quaternary)
                     .tracking(1.5)
                 Spacer()
                 HStack(spacing: 4) {
@@ -531,16 +518,12 @@ struct AmbientSelectorView: View {
                         Button { ambient.select(sound) } label: {
                             Image(systemName: sound.icon)
                                 .font(.system(size: 10))
-                                .foregroundColor(
-                                    ambient.current == sound
-                                        ? theme.accentColor
-                                        : .white.opacity(0.28)
-                                )
+                                .foregroundStyle(ambient.current == sound ? AnyShapeStyle(theme.accentColor) : AnyShapeStyle(.tertiary))
                                 .frame(width: 24, height: 24)
                                 .glassRoundedRect(
                                     cornerRadius: 5,
                                     fallback: ambient.current == sound
-                                        ? Color.white.opacity(0.1)
+                                        ? Color.primary.opacity(0.1)
                                         : Color.clear
                                 )
                         }
@@ -553,7 +536,7 @@ struct AmbientSelectorView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "speaker.fill")
                         .font(.system(size: 8))
-                        .foregroundColor(.white.opacity(0.2))
+                        .foregroundStyle(.quaternary)
                     Slider(
                         value: Binding(
                             get: { Double(ambient.volume) },
@@ -564,7 +547,7 @@ struct AmbientSelectorView: View {
                     .tint(theme.accentColor)
                     Image(systemName: "speaker.wave.3.fill")
                         .font(.system(size: 8))
-                        .foregroundColor(.white.opacity(0.2))
+                        .foregroundStyle(.quaternary)
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
@@ -583,26 +566,23 @@ struct AlarmSelectorView: View {
         HStack(spacing: 8) {
             Text("alarm.label", bundle: lang.bundle)
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundColor(.white.opacity(0.2))
+                .foregroundStyle(.quaternary)
                 .tracking(1.5)
             Spacer()
             HStack(spacing: 4) {
                 ForEach(AlarmSound.allCases) { sound in
                     Button {
                         alarm.current = sound
-                        sound.play()          // önizleme
+                        sound.play()
                     } label: {
                         Text(verbatim: sound.rawValue)
                             .font(.system(size: 9, weight: .medium))
-                            .foregroundColor(
-                                alarm.current == sound ? .white : .white.opacity(0.28)
-                            )
+                            .foregroundStyle(alarm.current == sound ? .primary : .tertiary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
                             .glassCapsule(
-                                fallback: alarm.current == sound
-                                    ? Color.white.opacity(0.12)
-                                    : Color.clear
+                                isActive: alarm.current == sound,
+                                fallback: Color.primary.opacity(0.12)
                             )
                     }
                     .buttonStyle(.plain)
@@ -621,7 +601,7 @@ struct LanguageSelectorView: View {
         HStack(spacing: 8) {
             Text("settings.language.label", bundle: lang.bundle)
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundColor(.white.opacity(0.2))
+                .foregroundStyle(.quaternary)
                 .tracking(1.5)
             Spacer()
             HStack(spacing: 4) {
@@ -631,13 +611,12 @@ struct LanguageSelectorView: View {
                     } label: {
                         Text(verbatim: language.label)
                             .font(.system(size: 9, weight: .medium))
-                            .foregroundColor(lang.currentLanguage == language ? .white : .white.opacity(0.28))
+                            .foregroundStyle(lang.currentLanguage == language ? .primary : .tertiary)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
                             .glassCapsule(
-                                fallback: lang.currentLanguage == language
-                                    ? Color.white.opacity(0.12)
-                                    : Color.clear
+                                isActive: lang.currentLanguage == language,
+                                fallback: Color.primary.opacity(0.12)
                             )
                     }
                     .buttonStyle(.plain)
@@ -656,7 +635,7 @@ struct QuitButtonView: View {
         Button { NSApplication.shared.terminate(nil) } label: {
             Text("app.quit", bundle: lang.bundle)
                 .font(.system(size: 11))
-                .foregroundColor(.white.opacity(0.25))
+                .foregroundStyle(.tertiary)
         }
         .buttonStyle(.plain)
     }

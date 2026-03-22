@@ -9,6 +9,7 @@ struct AIRadioView: View {
     @EnvironmentObject var theme: ThemeManager
     @EnvironmentObject var engine: TimerEngine
     @EnvironmentObject var streak: StreakManager
+    @EnvironmentObject var lang: LanguageManager
 
     @State private var showKeyInput = false
     @State private var keyDraft = ""
@@ -23,14 +24,14 @@ struct AIRadioView: View {
             if let err = aiRadio.errorMessage {
                 Text(verbatim: err)
                     .font(.system(size: 9))
-                    .foregroundColor(.red.opacity(0.55))
+                    .foregroundStyle(.red.opacity(0.7))
                     .transition(.opacity)
             }
         }
         .animation(.easeInOut(duration: 0.18), value: aiRadio.recommendation)
         .animation(.easeInOut(duration: 0.18), value: aiRadio.errorMessage)
         .sheet(isPresented: $showKeyInput) {
-            APIKeyInputView(draft: $keyDraft) { key in
+            APIKeyInputView(draft: $keyDraft, lang: lang) { key in
                 aiRadio.apiKey = key
             }
         }
@@ -40,31 +41,27 @@ struct AIRadioView: View {
 
     private var controlRow: some View {
         HStack(spacing: 8) {
-            Text("AI RADIO")
+            Text("ai.radio.label", bundle: lang.bundle)
                 .font(.system(size: 9, weight: .semibold))
-                .foregroundColor(.white.opacity(0.2))
+                .foregroundStyle(.quaternary)
                 .tracking(1.5)
 
             Spacer()
 
-            // API key button
             Button {
                 keyDraft = aiRadio.apiKey
                 showKeyInput = true
             } label: {
                 Image(systemName: aiRadio.apiKey.isEmpty ? "key.slash" : "key.fill")
                     .font(.system(size: 10))
-                    .foregroundColor(
-                        aiRadio.apiKey.isEmpty
-                            ? .white.opacity(0.2)
-                            : theme.accentColor.opacity(0.7)
+                    .foregroundStyle(
+                        aiRadio.apiKey.isEmpty ? AnyShapeStyle(.quaternary) : AnyShapeStyle(theme.accentColor.opacity(0.7))
                     )
                     .frame(width: 24, height: 24)
-                    .glassRoundedRect(cornerRadius: 5, fallback: Color.white.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
+                    .glassRoundedRect(cornerRadius: 5, fallback: Color.primary.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
             }
             .buttonStyle(.plain)
 
-            // Recommend button
             Button {
                 Task { await requestRecommendation() }
             } label: {
@@ -75,13 +72,11 @@ struct AIRadioView: View {
                 } else {
                     Image(systemName: "wand.and.stars")
                         .font(.system(size: 10))
-                        .foregroundColor(
-                            aiRadio.apiKey.isEmpty
-                                ? .white.opacity(0.15)
-                                : .white.opacity(0.6)
+                        .foregroundStyle(
+                            aiRadio.apiKey.isEmpty ? AnyShapeStyle(.quaternary) : AnyShapeStyle(.secondary)
                         )
                         .frame(width: 24, height: 24)
-                        .glassRoundedRect(cornerRadius: 5, fallback: Color.white.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
+                        .glassRoundedRect(cornerRadius: 5, fallback: Color.primary.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
                 }
             }
             .buttonStyle(.plain)
@@ -98,23 +93,23 @@ struct AIRadioView: View {
                 if let sound = rec.ambientSound {
                     Image(systemName: sound.icon)
                         .font(.system(size: 9))
-                        .foregroundColor(theme.accentColor)
+                        .foregroundStyle(theme.accentColor)
                 }
                 Text(verbatim: rec.mood)
                     .font(.system(size: 9, weight: .medium))
-                    .foregroundColor(.white.opacity(0.55))
+                    .foregroundStyle(.secondary)
 
                 Spacer()
 
                 Button {
                     applyRecommendation(rec)
                 } label: {
-                    Text("Uygula")
+                    Text("ai.radio.apply", bundle: lang.bundle)
                         .font(.system(size: 9, weight: .medium))
-                        .foregroundColor(.white.opacity(0.75))
+                        .foregroundStyle(.secondary)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
-                        .glassCapsule(fallback: Color.white.opacity(0.1))
+                        .glassCapsule(fallback: Color.primary.opacity(0.1))
                 }
                 .buttonStyle(.plain)
             }
@@ -122,7 +117,7 @@ struct AIRadioView: View {
             if !rec.reason.isEmpty {
                 Text(verbatim: rec.reason)
                     .font(.system(size: 9))
-                    .foregroundColor(.white.opacity(0.3))
+                    .foregroundStyle(.tertiary)
                     .lineLimit(2)
             }
         }
@@ -144,8 +139,6 @@ struct AIRadioView: View {
 
     private func applyRecommendation(_ rec: AIRadioResponse) {
         guard let sound = rec.ambientSound else { return }
-        // Eğer zaten bu ses çalıyorsa sadece volume'ü güncelle,
-        // aksi takdirde select() ile geç (toggle mantığı var).
         if ambient.current != sound {
             ambient.select(sound)
         }
@@ -157,18 +150,19 @@ struct AIRadioView: View {
 
 struct APIKeyInputView: View {
     @Binding var draft: String
+    let lang: LanguageManager
     let onSave: (String) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack(spacing: 16) {
-            Text("Claude API Anahtarı")
+            Text("ai.radio.apikey.title", bundle: lang.bundle)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundColor(.white)
+                .foregroundStyle(.primary)
 
-            Text("Anthropic Console'dan (console.anthropic.com)\naldığın anahtarı gir. Keychain'de güvenli saklanır.")
+            Text("ai.radio.apikey.description", bundle: lang.bundle)
                 .font(.system(size: 11))
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
 
             SecureField("sk-ant-...", text: $draft)
@@ -176,27 +170,27 @@ struct APIKeyInputView: View {
                 .font(.system(size: 11, design: .monospaced))
 
             HStack(spacing: 12) {
-                Button("İptal") {
+                Button(lang.loc("ai.radio.apikey.cancel")) {
                     dismiss()
                 }
-                .foregroundColor(.white.opacity(0.4))
+                .foregroundStyle(.tertiary)
 
-                Button("Kaydet") {
+                Button(lang.loc("ai.radio.apikey.save")) {
                     onSave(draft.trimmingCharacters(in: .whitespaces))
                     dismiss()
                 }
-                .foregroundColor(.white)
+                .foregroundStyle(.primary)
                 .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             .font(.system(size: 12))
 
             if !draft.isEmpty {
-                Button("Anahtarı Sil") {
+                Button(lang.loc("ai.radio.apikey.delete")) {
                     onSave("")
                     dismiss()
                 }
                 .font(.system(size: 10))
-                .foregroundColor(.red.opacity(0.5))
+                .foregroundStyle(.red.opacity(0.5))
             }
         }
         .padding(24)

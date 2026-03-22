@@ -37,6 +37,7 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
+            now: hour(10)
         )
         XCTAssertEqual(result?.kind, .shortBreak)
         XCTAssertEqual(result?.urgency, 1)
@@ -49,6 +50,7 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
+            now: hour(10)
         )
         XCTAssertEqual(result?.kind, .longBreak)
         XCTAssertEqual(result?.urgency, 2)
@@ -59,6 +61,7 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
+            now: hour(10) // stopForDay kuralı tetiklenmemesi için sabah saati
         )
         XCTAssertEqual(result?.kind, .longBreak)
     }
@@ -71,6 +74,7 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
+            now: hour(10)
         )
         XCTAssertNil(result)
     }
@@ -85,6 +89,7 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: sessions,
             currentStreak: 0,
+            now: hour(10) // toplam 5 focus, gece olursa stopForDay tetiklenir
         )
         XCTAssertNil(result)
     }
@@ -131,6 +136,7 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: [session(.focus)],
             currentStreak: 7,
+            now: hour(10)
         )
         XCTAssertEqual(result?.kind, .wellDone)
         XCTAssertEqual(result?.urgency, 1)
@@ -140,6 +146,7 @@ final class BreakAdvisorTests: XCTestCase {
         let result = BreakAdvisor.evaluate(
             todaySessions: [session(.focus)],
             currentStreak: 5,
+            now: hour(10)
         )
         XCTAssertNil(result)
     }

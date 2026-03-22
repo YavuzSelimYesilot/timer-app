@@ -107,7 +107,8 @@ public final class TimerEngine: ObservableObject {
     internal func tick() {
         if timeRemaining > 0 {
             timeRemaining -= 1
-        } else {
+        }
+        if timeRemaining <= 0 {
             complete()
         }
     }

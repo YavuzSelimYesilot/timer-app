@@ -25,18 +25,22 @@ struct BreakSuggestionView: View {
     }
 
     var body: some View {
-        if let s = suggestion {
-            BannerCard(suggestion: s) {
-                withAnimation(.easeInOut(duration: 0.2)) { dismissed = true }
+        Group {
+            if let s = suggestion {
+                BannerCard(suggestion: s) {
+                    withAnimation(.easeInOut(duration: 0.2)) { dismissed = true }
+                }
+                .transition(.asymmetric(
+                    insertion: .move(edge: .top).combined(with: .opacity),
+                    removal: .opacity
+                ))
             }
-            .transition(.asymmetric(
-                insertion: .move(edge: .top).combined(with: .opacity),
-                removal: .opacity
-            ))
+        }
+        // Yeni oturum kaydedilince dismissed sifirla, yeni oneri gosterilebilsin.
+        .onChange(of: allSessions.count, initial: false) { _, _ in
+            dismissed = false
         }
     }
-    // Yeni oturum kaydedilince dismissed sıfırla — yeni öneri gösterilebilsin
-    .onChange(of: allSessions.count) { dismissed = false }
 }
 
 // MARK: - Banner Card
@@ -89,13 +93,13 @@ private struct BannerCard: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
-        .background(
+        .glassRoundedRect(
+            cornerRadius: 8,
+            fallback: Color.white.opacity(suggestion.urgency == 3 ? 0.06 : 0.04)
+        )
+        .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.white.opacity(suggestion.urgency == 3 ? 0.06 : 0.04))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(accentColor.opacity(0.2), lineWidth: 1)
-                )
+                .strokeBorder(accentColor.opacity(0.2), lineWidth: 1)
         )
     }
 }

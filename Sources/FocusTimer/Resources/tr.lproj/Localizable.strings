@@ -51,3 +51,12 @@
 
 /* Alarm sound */
 "alarm.label" = "ALARM";
+
+/* Settings */
+"settings.title" = "Ayarlar";
+
+/* Tasks */
+"tasks.title" = "GÖREVLER";
+"tasks.input.placeholder" = "Görev ekle…";
+"tasks.empty" = "Henüz görev yok";
+"tasks.completed" = "tamamlandı";

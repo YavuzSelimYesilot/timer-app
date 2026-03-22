@@ -60,8 +60,7 @@ struct AIRadioView: View {
                             : theme.accentColor.opacity(0.7)
                     )
                     .frame(width: 24, height: 24)
-                    .background(Color.white.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
-                    .clipShape(RoundedRectangle(cornerRadius: 5))
+                    .glassRoundedRect(cornerRadius: 5, fallback: Color.white.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
             }
             .buttonStyle(.plain)
 
@@ -82,8 +81,7 @@ struct AIRadioView: View {
                                 : .white.opacity(0.6)
                         )
                         .frame(width: 24, height: 24)
-                        .background(Color.white.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
-                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .glassRoundedRect(cornerRadius: 5, fallback: Color.white.opacity(aiRadio.apiKey.isEmpty ? 0 : 0.07))
                 }
             }
             .buttonStyle(.plain)
@@ -116,8 +114,7 @@ struct AIRadioView: View {
                         .foregroundColor(.white.opacity(0.75))
                         .padding(.horizontal, 8)
                         .padding(.vertical, 3)
-                        .background(Color.white.opacity(0.1))
-                        .clipShape(Capsule())
+                        .glassCapsule(fallback: Color.white.opacity(0.1))
                 }
                 .buttonStyle(.plain)
             }
@@ -204,6 +201,6 @@ struct APIKeyInputView: View {
         }
         .padding(24)
         .frame(width: 300)
-        .background(Color(red: 0.1, green: 0.1, blue: 0.1))
+        .glassRoundedRect(cornerRadius: 12, fallback: Color(red: 0.1, green: 0.1, blue: 0.1))
     }
 }

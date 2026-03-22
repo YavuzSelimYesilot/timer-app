@@ -51,3 +51,12 @@
 
 /* Alarm sound */
 "alarm.label" = "通知音";
+
+/* Settings */
+"settings.title" = "設定";
+
+/* Tasks */
+"tasks.title" = "タスク";
+"tasks.input.placeholder" = "タスクを追加…";
+"tasks.empty" = "タスクなし";
+"tasks.completed" = "完了";

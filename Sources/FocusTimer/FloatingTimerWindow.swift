@@ -107,13 +107,12 @@ struct FloatingTimerView: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(theme.accentColor)
                     .frame(width: 28, height: 28)
-                    .background(Color.white.opacity(0.08))
-                    .clipShape(Circle())
+                    .glassCircle(fallback: Color.white.opacity(0.08))
             }
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(Color(red: 0.07, green: 0.07, blue: 0.07))
+        .glassContainer()
     }
 }

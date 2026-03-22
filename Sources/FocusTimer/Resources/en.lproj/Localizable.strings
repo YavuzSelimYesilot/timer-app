@@ -51,3 +51,12 @@
 
 /* Alarm sound */
 "alarm.label" = "ALARM";
+
+/* Settings */
+"settings.title" = "Settings";
+
+/* Tasks */
+"tasks.title" = "TASKS";
+"tasks.input.placeholder" = "Add a task…";
+"tasks.empty" = "No tasks yet";
+"tasks.completed" = "completed";

@@ -15,6 +15,8 @@ struct ContentView: View {
     @EnvironmentObject var streak: StreakManager
     @Environment(\.modelContext) private var modelContext
     @State private var showHistory = false
+    @State private var showSettings = false
+    @State private var showTasks = false
     @State private var showDevAssistant = false
     @ObservedObject private var floatingController = FloatingTimerController.shared
     @State private var cancellables = Set<AnyCancellable>()
@@ -38,7 +40,7 @@ struct ContentView: View {
 
                 Button {
                     showHistory.toggle()
-                    if showHistory { showDevAssistant = false }
+                    if showHistory { showSettings = false; showTasks = false; showDevAssistant = false }
                 } label: {
                     Image(systemName: "chart.bar.fill")
                         .font(.system(size: 12))
@@ -47,8 +49,28 @@ struct ContentView: View {
                 .buttonStyle(.plain)
 
                 Button {
+                    showTasks.toggle()
+                    if showTasks { showHistory = false; showSettings = false; showDevAssistant = false }
+                } label: {
+                    Image(systemName: showTasks ? "checklist.checked" : "checklist")
+                        .font(.system(size: 12))
+                        .foregroundColor(showTasks ? .white : .white.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    showSettings.toggle()
+                    if showSettings { showHistory = false; showTasks = false; showDevAssistant = false }
+                } label: {
+                    Image(systemName: showSettings ? "gearshape.fill" : "gearshape")
+                        .font(.system(size: 12))
+                        .foregroundColor(showSettings ? .white : .white.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+
+                Button {
                     showDevAssistant.toggle()
-                    if showDevAssistant { showHistory = false }
+                    if showDevAssistant { showHistory = false; showSettings = false; showTasks = false }
                 } label: {
                     Image(systemName: showDevAssistant ? "wrench.and.screwdriver.fill" : "wrench.and.screwdriver")
                         .font(.system(size: 12))
@@ -72,6 +94,18 @@ struct ContentView: View {
                         insertion: .move(edge: .trailing).combined(with: .opacity),
                         removal: .move(edge: .trailing).combined(with: .opacity)
                     ))
+            } else if showSettings {
+                SettingsView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .trailing).combined(with: .opacity)
+                    ))
+            } else if showTasks {
+                DailyTaskView()
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .trailing).combined(with: .opacity)
+                    ))
             } else {
                 timerBody
                     .transition(.asymmetric(
@@ -81,8 +115,10 @@ struct ContentView: View {
             }
         }
         .frame(width: 280)
-        .background(Color(red: 0.07, green: 0.07, blue: 0.07))
+        .glassContainer()
         .animation(.easeInOut(duration: 0.22), value: showHistory)
+        .animation(.easeInOut(duration: 0.22), value: showSettings)
+        .animation(.easeInOut(duration: 0.22), value: showTasks)
         .animation(.easeInOut(duration: 0.22), value: showDevAssistant)
         .onAppear {
             observeCompletion()
@@ -112,38 +148,8 @@ struct ContentView: View {
         BreakSuggestionView()
             .padding(.top, 10)
             .padding(.horizontal, 20)
+            .padding(.bottom, 16)
             .animation(.easeInOut(duration: 0.25), value: engine.completedSessions)
-
-        PresetSelectorView()
-            .padding(.top, 16)
-            .padding(.horizontal, 20)
-
-        ThemeSelectorView()
-            .padding(.top, 10)
-            .padding(.horizontal, 20)
-
-        AmbientSelectorView()
-            .padding(.top, 10)
-            .padding(.horizontal, 20)
-
-        AIRadioView()
-            .padding(.top, 10)
-            .padding(.horizontal, 20)
-
-        AlarmSelectorView()
-            .padding(.top, 10)
-            .padding(.horizontal, 20)
-
-        LanguageSelectorView()
-            .padding(.top, 10)
-            .padding(.horizontal, 20)
-
-        Divider()
-            .background(Color.white.opacity(0.06))
-            .padding(.top, 12)
-
-        QuitButtonView()
-            .padding(.vertical, 10)
     }
 
     // MARK: - Completion handling
@@ -164,6 +170,10 @@ struct ContentView: View {
     }
 
     private func sendNotification(for mode: TimerMode, completedSessions: Int) {
+        // swift run ile çalıştırıldığında .app bundle olmadığı için
+        // UNUserNotificationCenter crash verir — guard ile koru.
+        guard Bundle.main.bundleURL.pathExtension == "app" else { return }
+
         let content = UNMutableNotificationContent()
         switch mode {
         case .focus:
@@ -208,14 +218,13 @@ struct ModeSelectorView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 6)
                         .background(engine.mode == mode ? Color.white.opacity(0.1) : Color.clear)
-                        .cornerRadius(6)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
                 .buttonStyle(.plain)
             }
         }
         .padding(3)
-        .background(Color.white.opacity(0.05))
-        .cornerRadius(8)
+        .glassRoundedRect(cornerRadius: 8, fallback: Color.white.opacity(0.05))
     }
 }
 
@@ -416,8 +425,7 @@ struct CircleButton: View {
                 .font(.system(size: iconSize, weight: .medium))
                 .foregroundColor(foreground)
                 .frame(width: size, height: size)
-                .background(background)
-                .clipShape(Circle())
+                .glassCircle(fallback: background)
         }
         .buttonStyle(.plain)
     }
@@ -438,12 +446,11 @@ struct PresetSelectorView: View {
                         .foregroundColor(isActive(preset) ? .white : .white.opacity(0.35))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
-                        .background(isActive(preset) ? Color.white.opacity(0.12) : Color.clear)
+                        .glassCapsule(fallback: isActive(preset) ? Color.white.opacity(0.12) : Color.clear)
                         .overlay(
                             Capsule()
                                 .stroke(Color.white.opacity(isActive(preset) ? 0 : 0.1), lineWidth: 1)
                         )
-                        .clipShape(Capsule())
                 }
                 .buttonStyle(.plain)
             }
@@ -456,8 +463,7 @@ struct PresetSelectorView: View {
                     .foregroundColor(.white.opacity(0.4))
                     .padding(.horizontal, 7)
                     .padding(.vertical, 4)
-                    .background(Color.white.opacity(0.08))
-                    .clipShape(Capsule())
+                    .glassCapsule(fallback: Color.white.opacity(0.08))
             } else {
                 Text("\(engine.currentDurationMinutes)m")
                     .font(.system(size: 10, weight: .regular))
@@ -531,12 +537,12 @@ struct AmbientSelectorView: View {
                                         : .white.opacity(0.28)
                                 )
                                 .frame(width: 24, height: 24)
-                                .background(
-                                    ambient.current == sound
+                                .glassRoundedRect(
+                                    cornerRadius: 5,
+                                    fallback: ambient.current == sound
                                         ? Color.white.opacity(0.1)
                                         : Color.clear
                                 )
-                                .clipShape(RoundedRectangle(cornerRadius: 5))
                         }
                         .buttonStyle(.plain)
                     }
@@ -593,12 +599,11 @@ struct AlarmSelectorView: View {
                             )
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
-                            .background(
-                                alarm.current == sound
+                            .glassCapsule(
+                                fallback: alarm.current == sound
                                     ? Color.white.opacity(0.12)
                                     : Color.clear
                             )
-                            .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
                 }
@@ -629,10 +634,11 @@ struct LanguageSelectorView: View {
                             .foregroundColor(lang.currentLanguage == language ? .white : .white.opacity(0.28))
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
-                            .background(lang.currentLanguage == language
-                                ? Color.white.opacity(0.12)
-                                : Color.clear)
-                            .clipShape(Capsule())
+                            .glassCapsule(
+                                fallback: lang.currentLanguage == language
+                                    ? Color.white.opacity(0.12)
+                                    : Color.clear
+                            )
                     }
                     .buttonStyle(.plain)
                 }

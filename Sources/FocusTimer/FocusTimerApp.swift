@@ -18,19 +18,31 @@ struct FocusTimerApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            ContentView()
-                .environmentObject(engine)
-                .environmentObject(theme)
-                .environmentObject(lang)
-                .environmentObject(ambient)
-                .environmentObject(alarm)
-                .environmentObject(streak)
-                .environmentObject(aiRadio)
+            rootContentView
         } label: {
             MenuBarLabel(engine: engine, theme: theme)
         }
         .menuBarExtraStyle(.window)
-        .modelContainer(for: FocusSession.self)
+        .modelContainer(for: [FocusSession.self, DailyTask.self])
+
+#if DEBUG
+        WindowGroup("FocusTimer") {
+            rootContentView
+                .frame(minWidth: 420, minHeight: 640)
+        }
+        .modelContainer(for: [FocusSession.self, DailyTask.self])
+#endif
+    }
+
+    private var rootContentView: some View {
+        ContentView()
+            .environmentObject(engine)
+            .environmentObject(theme)
+            .environmentObject(lang)
+            .environmentObject(ambient)
+            .environmentObject(alarm)
+            .environmentObject(streak)
+            .environmentObject(aiRadio)
     }
 }
 
@@ -71,7 +83,17 @@ struct MenuBarLabel: View {
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
+#if DEBUG
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+#else
         NSApp.setActivationPolicy(.accessory)
+#endif
+
+        // Swift Package olarak Xcode'dan dogrudan calistirirken process bazen .app bundle
+        // icinde olmaz. Bu durumda bildirim izni istemek crash'e neden olabiliyor.
+        guard Bundle.main.bundleURL.pathExtension == "app" else { return }
+
         UNUserNotificationCenter.current()
             .requestAuthorization(options: [.alert, .sound]) { _, _ in }
     }
